@@ -8,89 +8,106 @@
 #include "<#=g.PackageName#>Marshaling.h"
 
 <# 
+List<string> parentNameList = new List<string>();
+parentNameList.Add(g.PackageName);
+
 foreach(DescriptorProto message in g.ProtoFile.MessageType)
 {
+    GenerateMessageMarshalingDefine(message, parentNameList);
+}
 #>
-void GRPC_TO_TURBOLINK(const ::<#=g.PackageName#>::<#=message.Name#>* in, FGrpc<#=g.PackageName#><#=message.Name#>* out)
+<#+
+private void GenerateMessageMarshalingDefine(DescriptorProto message, List<string> parentNameList)
 {
-<#
+	List<string> currentNameList = new List<string>(parentNameList);
+	currentNameList.Add(message.Name);
+
+	foreach(DescriptorProto messageInMsg in message.NestedType)
+	{
+		GenerateMessageMarshalingDefine(messageInMsg, currentNameList);
+	}
+#>
+void GRPC_TO_TURBOLINK(const ::<#=g.PrintNameList(parentNameList, "::")#>::<#=message.Name#>* in, FGrpc<#=g.PrintNameList(parentNameList, string.Empty)#><#=message.Name#>* out)
+{
+<#+
     foreach(FieldDescriptorProto field in message.Field)
     {
         var fieldGetName = g.GetFieldGrpcName(field);
 #>
-<#if(field.Label==FieldDescriptorProto.Types.Label.Repeated) { #>
+<#+if(field.Label==FieldDescriptorProto.Types.Label.Repeated) { #>
     for (int i=0; i<in-><#=g.GetFieldGrpcName(field)#>_size(); ++i) {
-<#if(field.Type==FieldDescriptorProto.Types.Type.String) { #>
+<#+if(field.Type==FieldDescriptorProto.Types.Type.String) { #>
         out-><#=g.GetFieldName(field)#>.Add(UTF8_TO_TCHAR(in-><#=fieldGetName#>(i).c_str()));
-<#}else if(field.Type==FieldDescriptorProto.Types.Type.Bytes) { #>
+<#+}else if(field.Type==FieldDescriptorProto.Types.Type.Bytes) { #>
         out-><#=g.GetFieldName(field)#>.Add(FBytes((const uint8*)in-><#=fieldGetName#>(i).c_str(), in-><#=fieldGetName#>(i).length()));
-<#}else if(field.Type==FieldDescriptorProto.Types.Type.Enum) { #>
+<#+}else if(field.Type==FieldDescriptorProto.Types.Type.Enum) { #>
         out-><#=g.GetFieldName(field)#>.Add(StaticCast<<#=g.GetFieldType(field)#>>(in-><#=fieldGetName#>(i)));
-<#}else if(field.Type==FieldDescriptorProto.Types.Type.Message) { #>
+<#+}else if(field.Type==FieldDescriptorProto.Types.Type.Message) { #>
         GRPC_TO_TURBOLINK(&(in-><#=fieldGetName#>(i)), &(out-><#=g.GetFieldName(field)#>.AddZeroed_GetRef()));
-<#} else {#>
+<#+} else {#>
         out-><#=g.GetFieldName(field)#>.Add(in-><#=fieldGetName#>(i));
-<#}#>
+<#+}#>
     }
-<#} else {#>
-<#if(field.Type==FieldDescriptorProto.Types.Type.String) { #>
+<#+} else {#>
+<#+if(field.Type==FieldDescriptorProto.Types.Type.String) { #>
     out-><#=g.GetFieldName(field)#>=UTF8_TO_TCHAR(in-><#=fieldGetName#>().c_str());
-<#} else if(field.Type==FieldDescriptorProto.Types.Type.Bytes) { #>
+<#+} else if(field.Type==FieldDescriptorProto.Types.Type.Bytes) { #>
     out-><#=g.GetFieldName(field)#>=FBytes((const uint8*)in-><#=fieldGetName#>().c_str(), in-><#=fieldGetName#>().length());
-<#}else if(field.Type==FieldDescriptorProto.Types.Type.Enum) { #>
+<#+}else if(field.Type==FieldDescriptorProto.Types.Type.Enum) { #>
     out-><#=g.GetFieldName(field)#>=StaticCast<<#=g.GetFieldType(field)#>>(in-><#=fieldGetName#>());
-<#}else if(field.Type==FieldDescriptorProto.Types.Type.Message) { #>
+<#+}else if(field.Type==FieldDescriptorProto.Types.Type.Message) { #>
     GRPC_TO_TURBOLINK(&(in-><#=fieldGetName#>()), &(out-><#=g.GetFieldName(field)#>));
-<#} else {#>
+<#+} else {#>
     out-><#=g.GetFieldName(field)#>=in-><#=fieldGetName#>();
-<#}#>
-<#
+<#+}#>
+<#+
     }
 }
 #>
 }
 
-void TURBOLINK_TO_GRPC(const FGrpc<#=g.PackageName#><#=message.Name#>* in, ::<#=g.PackageName#>::<#=message.Name#>* out)
+void TURBOLINK_TO_GRPC(const FGrpc<#=g.PrintNameList(parentNameList, string.Empty)#><#=message.Name#>* in, ::<#=g.PrintNameList(parentNameList, "::")#>::<#=message.Name#>* out)
 {
-<#
+<#+
     foreach(FieldDescriptorProto field in message.Field)
     {
         var fieldsetName = "set_"+g.GetFieldGrpcName(field);
 #>
-<#if(field.Label==FieldDescriptorProto.Types.Label.Repeated) { #>
+<#+if(field.Label==FieldDescriptorProto.Types.Label.Repeated) { #>
     for(const <#=g.GetFieldType(field)#>& value : in-><#=g.GetFieldName(field)#>) {
-<#if(field.Type==FieldDescriptorProto.Types.Type.String) { #>
+<#+if(field.Type==FieldDescriptorProto.Types.Type.String) { #>
         out->add_<#=g.GetFieldGrpcName(field)#>(TCHAR_TO_UTF8(*value));
-<#} else if(field.Type==FieldDescriptorProto.Types.Type.Bytes) { #>
+<#+} else if(field.Type==FieldDescriptorProto.Types.Type.Bytes) { #>
         out->add_<#=g.GetFieldGrpcName(field)#>((const char*)value.Value.GetData(), (size_t)value.Value.Num());
-<#} else if(field.Type==FieldDescriptorProto.Types.Type.Enum) { #>
+<#+} else if(field.Type==FieldDescriptorProto.Types.Type.Enum) { #>
         out->add_<#=g.GetFieldGrpcName(field)#>(<#=g.GetMessageGrpcName(field.TypeName)#>(static_cast<uint8>(value)));
-<#}else if(field.Type==FieldDescriptorProto.Types.Type.Message) { #>
+<#+}else if(field.Type==FieldDescriptorProto.Types.Type.Message) { #>
         TURBOLINK_TO_GRPC(&value, out->add_<#=g.GetFieldGrpcName(field)#>());
-<#} else {#>
+<#+} else {#>
         out->add_<#=g.GetFieldGrpcName(field)#>(value);
-<#}#>
+<#+}#>
     } 
-<#} else { #>
-<#if(field.Type==FieldDescriptorProto.Types.Type.String) { #>
+<#+} else { #>
+<#+if(field.Type==FieldDescriptorProto.Types.Type.String) { #>
     out-><#=fieldsetName#>(TCHAR_TO_UTF8(*(in-><#=g.GetFieldName(field)#>)));
-<#} else if(field.Type==FieldDescriptorProto.Types.Type.Bytes) { #>
+<#+} else if(field.Type==FieldDescriptorProto.Types.Type.Bytes) { #>
     {
         std::string* t = out->mutable_<#=g.GetFieldGrpcName(field)#>();
         t->append((const char*)(in-><#=g.GetFieldName(field)#>.Value.GetData()), (size_t)in-><#=g.GetFieldName(field)#>.Value.Num());
     }
-<#} else if(field.Type==FieldDescriptorProto.Types.Type.Enum) { #>
+<#+} else if(field.Type==FieldDescriptorProto.Types.Type.Enum) { #>
     out-><#=fieldsetName#>(<#=g.GetMessageGrpcName(field.TypeName)#>(static_cast<uint8>(in-><#=g.GetFieldName(field)#>)));
-<#}else if(field.Type==FieldDescriptorProto.Types.Type.Message) { #>
+<#+}else if(field.Type==FieldDescriptorProto.Types.Type.Message) { #>
     TURBOLINK_TO_GRPC(&(in-><#=g.GetFieldName(field)#>), out->mutable_<#=g.GetFieldGrpcName(field)#>());
-<#} else {#>
+<#+} else {#>
     out-><#=fieldsetName#>(in-><#=g.GetFieldName(field)#>);
-<#}#>
-<# 
+<#+}#>
+<#+ 
     }
 }
 #>
 }
-<#
+
+<#+
 }
 #>

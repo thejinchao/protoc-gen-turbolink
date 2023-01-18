@@ -147,13 +147,13 @@ namespace protoc_gen_turbolink
                 case FieldDescriptorProto.Types.Type.Group:
                     break; //TODO
                 case FieldDescriptorProto.Types.Type.Message:
-                    ueType += "FGrpc" + PackageName + field.TypeName.Substring(field.TypeName.LastIndexOf('.') + 1); break;
+                    ueType += "FGrpc" + field.TypeName.Replace(".", String.Empty); break;
                 case FieldDescriptorProto.Types.Type.Bytes:
                     ueType += "FBytes"; break;
                 case FieldDescriptorProto.Types.Type.Uint32:
                     ueType += "FUInt32"; break;
                 case FieldDescriptorProto.Types.Type.Enum:
-                    ueType += "E" + field.TypeName.Substring(field.TypeName.LastIndexOf('.') + 1); break;
+                    ueType += "EGrpc" + field.TypeName.Replace(".", String.Empty); break;
                 case FieldDescriptorProto.Types.Type.Sfixed32:
                     ueType += "int32"; break;
                 case FieldDescriptorProto.Types.Type.Sfixed64:
@@ -226,6 +226,19 @@ namespace protoc_gen_turbolink
                 }
             }
             return counts;
+        }
+        public string PrintNameList(List<string> parentNameList, string dotChar)
+        {
+            StringBuilder output = new StringBuilder();
+            foreach (string n in parentNameList)
+            {
+                output.Append(n);
+                if (dotChar != string.Empty) output.Append(dotChar);
+            }
+            if (dotChar!=string.Empty && output.Length > dotChar.Length)
+                return output.Remove(output.Length - dotChar.Length, dotChar.Length).ToString();
+
+            return output.ToString();
         }
     }
 }

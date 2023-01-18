@@ -10,13 +10,12 @@
 #include "pb/<#=System.IO.Path.GetFileNameWithoutExtension(g.ProtoFile.Name)#>.grpc.pb.h"
 
 <# 
+List<string> parentNameList = new List<string>();
+parentNameList.Add(g.PackageName);
+
 foreach(DescriptorProto message in g.ProtoFile.MessageType)
 {
-#>
-void GRPC_TO_TURBOLINK(const ::<#=g.PackageName#>::<#=message.Name#>* in, FGrpc<#=g.PackageName#><#=message.Name#>* out);
-void TURBOLINK_TO_GRPC(const FGrpc<#=g.PackageName#><#=message.Name#>* in, ::<#=g.PackageName#>::<#=message.Name#>* out);
-
-<#
+	GenerateMessageMarshalingDeclare(message, parentNameList);
 }
 #>
 <#
@@ -36,5 +35,22 @@ typedef grpc::ClientAsyncResponseReader<<#=g.GetMessageGrpcName(method.OutputTyp
 <#}#>
 <#
 	}
+}
+#>
+<#+
+private void GenerateMessageMarshalingDeclare(DescriptorProto message, List<string> parentNameList)
+{
+	List<string> currentNameList = new List<string>(parentNameList);
+	currentNameList.Add(message.Name);
+
+	foreach(DescriptorProto messageInMsg in message.NestedType)
+	{
+		GenerateMessageMarshalingDeclare(messageInMsg, currentNameList);
+	}
+#>
+void GRPC_TO_TURBOLINK(const ::<#=g.PrintNameList(parentNameList, "::")#>::<#=message.Name#>* in, FGrpc<#=g.PrintNameList(parentNameList, string.Empty)#><#=message.Name#>* out);
+void TURBOLINK_TO_GRPC(const FGrpc<#=g.PrintNameList(parentNameList, string.Empty)#><#=message.Name#>* in, ::<#=g.PrintNameList(parentNameList, "::")#>::<#=message.Name#>* out);
+
+<#+
 }
 #>
