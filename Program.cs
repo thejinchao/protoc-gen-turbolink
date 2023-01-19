@@ -21,6 +21,7 @@ namespace protoc_gen_turbolink
             //create code generator reponse
             CodeGeneratorResponse response = new CodeGeneratorResponse();
 
+            StringBuilder inputFileNames = new StringBuilder();
             foreach (FileDescriptorProto protoFile in request.ProtoFile)
             {
                 TurboLinkGenerator generator = new TurboLinkGenerator(protoFile);
@@ -36,11 +37,13 @@ namespace protoc_gen_turbolink
                     newFile.Content = generatedFile.Content;
                     response.File.Add(newFile);
                 }
+
+                inputFileNames.Append(System.IO.Path.GetFileNameWithoutExtension(protoFile.Name)+"_");
             }
 
             //debug file
             //CodeGeneratorResponse.Types.File file = new CodeGeneratorResponse.Types.File();
-            //file.Name = "request_dump.json";
+            //file.Name = inputFileNames.ToString() + "dump.json";
             //file.Content = string.Format("{0}", request.ToString());
             //response.File.Add(file);
 
