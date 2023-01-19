@@ -10,7 +10,13 @@
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "TurboLinkGrpcClient.h"
 #include "<#=g.PackageName#>Message.h"
+<#
+if(g.ProtoFile.Service.Count>0) {
+#>
 #include "<#=g.PackageName#>Node.generated.h"
+<#
+}
+#>
 
 <#
 foreach (ServiceDescriptorProto service in g.ProtoFile.Service)

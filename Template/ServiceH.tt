@@ -8,9 +8,15 @@
 #pragma once
 #include "TurboLinkGrpcService.h"
 #include "S<#=g.PackageName#>/<#=g.PackageName#>Client.h"
+<#
+if(g.GetNoneClientStreamingFunctionCounts(g.ProtoFile)>0) {
+#>
 #include "<#=g.PackageName#>Service.generated.h"
 
 class UTurboLinkGrpcManager;
+<# 
+} 
+#>
 
 <#
 foreach (ServiceDescriptorProto service in g.ProtoFile.Service)
