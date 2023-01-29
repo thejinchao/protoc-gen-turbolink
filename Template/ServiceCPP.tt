@@ -29,13 +29,17 @@ U<#=service.Name#>::~U<#=service.Name#>()
 void U<#=service.Name#>::Connect()
 {
 	FString serviceEndPoint = UTurboLinkGrpcUtilities::GetTurboLinkGrpcConfig()->GetServiceEndPoint(TEXT("<#=service.Name#>"));
-
 	UE_LOG(LogTurboLink, Warning, TEXT("Connect to <#=service.Name#>: '%s'"), *serviceEndPoint);
 
-	d->Channel = TurboLinkManager->d->CreateServiceChannel(TCHAR_TO_UTF8(*serviceEndPoint), this);
-	d->Stub = ::<#=g.PackageName#>::<#=service.Name#>::NewStub(d->Channel->RpcChannel);
+	if (d->Channel == nullptr) {
+		d->Channel = TurboLinkManager->d->CreateServiceChannel(TCHAR_TO_UTF8(*serviceEndPoint), this);
+	}
+	if (d->Stub == nullptr) {
+		d->Stub = ::<#=g.PackageName#>::<#=service.Name#>::NewStub(d->Channel->RpcChannel);
+	}
+
 	grpc_connectivity_state currentChannelState = d->Channel->RpcChannel->GetState(true);
-	if (d->Channel->AttachedServices.size()>1)
+	if (OnServiceStateChanged.IsBound())
 	{
 		OnServiceStateChanged.Broadcast(UTurboLinkGrpcManager::Private::GrpcStateToServiceState(currentChannelState));
 	}

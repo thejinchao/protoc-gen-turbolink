@@ -45,6 +45,7 @@ void GrpcContext_<#=service.Name#>_<#=method.Name#>::Call(const <#=g.GetMessageN
 		SendQueue.push_back(rpcRequest);
 	}
 }
+
 <# }else if(method.ClientStreaming && !method.ServerStreaming) { #>
 #pragma error("Client Streaming Not support yet!")
 <# } else if(!method.ClientStreaming && method.ServerStreaming) { #>
@@ -59,6 +60,7 @@ void GrpcContext_<#=service.Name#>_<#=method.Name#>::Call(const <#=g.GetMessageN
 	U<#=service.Name#>* service = (U<#=service.Name#>*)Service;
 	RpcReaderWriter = service->d->Stub->Async<#=method.Name#>(RpcContext.get(), rpcRequest, service->TurboLinkManager->d->CompletionQueue.get(), InitialTag);
 }
+
 <#} else {#>
 void GrpcContext_<#=service.Name#>_<#=method.Name#>::Call(const <#=g.GetMessageName(method.InputType)#>& Request)
 {
@@ -72,6 +74,7 @@ void GrpcContext_<#=service.Name#>_<#=method.Name#>::Call(const <#=g.GetMessageN
 	RpcReaderWriter = service->d->Stub->Async<#=method.Name#>(RpcContext.get(), rpcRequest, service->TurboLinkManager->d->CompletionQueue.get());
 	RpcReaderWriter->ReadInitialMetadata(InitialTag);
 }
+
 <#}#>
 void GrpcContext_<#=service.Name#>_<#=method.Name#>::OnRpcEvent(bool Ok, const void* EventTag)
 {

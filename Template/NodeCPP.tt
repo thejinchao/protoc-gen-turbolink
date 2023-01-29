@@ -82,15 +82,17 @@ void UCall<#=service.Name#><#=method.Name#>::OnResponse(FGrpcContextHandle Handl
 
 void UCall<#=service.Name#><#=method.Name#>::Shutdown()
 {
+	<#=service.Name#>->OnServiceStateChanged.RemoveDynamic(this, &UCall<#=service.Name#><#=method.Name#>::OnServiceStateChanged);
 	if (<#=service.Name#>Client != nullptr)
 	{
+		<#=service.Name#>->RemoveClient(<#=service.Name#>Client);
 		<#=service.Name#>Client->Shutdown();
 		<#=service.Name#>Client = nullptr;
 	}
 
 	if (<#=service.Name#> != nullptr)
 	{
-		<#=service.Name#>->Shutdown();
+		UTurboLinkGrpcUtilities::GetTurboLinkGrpcManager()->ReleaseService(<#=service.Name#>);
 		<#=service.Name#> = nullptr;
 	}
 

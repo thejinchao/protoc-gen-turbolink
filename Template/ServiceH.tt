@@ -36,8 +36,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	U<#=service.Name#>Client* MakeClient();
 
-	virtual void Shutdown() override;
 private:
+	virtual void Shutdown() override;
+
 	UPROPERTY()
 	U<#=service.Name#>Client* InnerClient; 
 public:
