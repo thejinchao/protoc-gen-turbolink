@@ -17,15 +17,38 @@ namespace protoc_gen_turbolink
     {
         public FileDescriptorProto ProtoFile;
         public string PackageName;
+        public string FileName;
 
         public List<GeneratedFile> GeneratedFiles = new List<GeneratedFile>();
         public TurboLinkGenerator(FileDescriptorProto protoFile)
         {
             ProtoFile = protoFile;
         }
+        string GetCamelPackageName(string input)
+        {
+            string[] words = input.Split('.').ToArray();
+            string result = "";
+            foreach (string word in words)
+            {
+                result += char.ToUpper(word[0]) + word.Substring(1);
+            }
+            return result;
+        }
+        string GetCamelFileName(string input)
+        {
+            string fileName = input.Split('/').ToArray().Last(); 
+            fileName = fileName.Split('.').ToArray().First();   // remove extension
+            var words = fileName.Split(new[] { "_", " " }, StringSplitOptions.RemoveEmptyEntries);
+            words = words
+                .Select(word => char.ToUpper(word[0]) + word.Substring(1))
+                .ToArray();
+            return string.Join(string.Empty, words);
+        }
+
         public bool Prepare()
 		{
-            PackageName = ProtoFile.Package;
+            PackageName = GetCamelPackageName(ProtoFile.Package);
+            FileName = GetCamelFileName(ProtoFile.Name);
             return true;
         }
         public void BuildOutputFiles()
@@ -35,20 +58,20 @@ namespace protoc_gen_turbolink
             // xxxMarshaling.h
             Template.MarshalingH marshalingHTemplate = new Template.MarshalingH(this);
             file = new GeneratedFile();
-            file.FileName = Path.Combine("Private", "S" + PackageName, PackageName + "Marshaling.h");
+            file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Marshaling.h");
             file.Content = marshalingHTemplate.TransformText();
             GeneratedFiles.Add(file);
 
             // xxxMarshaling.cpp
             Template.MarshalingCPP marshalingCPPTemplate = new Template.MarshalingCPP(this);
             file = new GeneratedFile();
-            file.FileName = Path.Combine("Private", "S" + PackageName, PackageName + "Marshaling.cpp");
+            file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Marshaling.cpp");
             file.Content = marshalingCPPTemplate.TransformText();
             GeneratedFiles.Add(file);
 
             // xxxMessage.h
             Template.MessageH messageHTemplate = new Template.MessageH(this);
-            file.FileName = Path.Combine("Public", "S" + PackageName, PackageName + "Message.h");
+            file.FileName = Path.Combine("Public", "S" + PackageName, FileName + "Message.h");
             file.Content = messageHTemplate.TransformText();
             GeneratedFiles.Add(file);
 
@@ -57,70 +80,70 @@ namespace protoc_gen_turbolink
                 // xxxService.h
                 Template.ServiceH serviceHTemplate = new Template.ServiceH(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Public", "S" + PackageName, PackageName + "Service.h");
+                file.FileName = Path.Combine("Public", "S" + PackageName, FileName + "Service.h");
                 file.Content = serviceHTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxClient.h
                 Template.ClientH clientHTemplate = new Template.ClientH(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Public", "S" + PackageName, PackageName + "Client.h");
+                file.FileName = Path.Combine("Public", "S" + PackageName, FileName + "Client.h");
                 file.Content = clientHTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxClient.cpp
                 Template.ClientCPP clientCPPTemplate = new Template.ClientCPP(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, PackageName + "Client.cpp");
+                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Client.cpp");
                 file.Content = clientCPPTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxServicePrivate.h
                 Template.ServicePrivateH servicePrivateHTemplate = new Template.ServicePrivateH(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, PackageName + "Service_Private.h");
+                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Service_Private.h");
                 file.Content = servicePrivateHTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxServicePrivate.cpp
                 Template.ServicePrivateCPP servicePrivateCPPTemplate = new Template.ServicePrivateCPP(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, PackageName + "Service_Private.cpp");
+                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Service_Private.cpp");
                 file.Content = servicePrivateCPPTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxContext.h
                 Template.ContextH contextHTemplate = new Template.ContextH(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, PackageName + "Context.h");
+                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Context.h");
                 file.Content = contextHTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxContext.cpp
                 Template.ContextCPP contextCPPTemplate = new Template.ContextCPP(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, PackageName + "Context.cpp");
+                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Context.cpp");
                 file.Content = contextCPPTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxService.cpp
                 Template.ServiceCPP serviceCPPTemplate = new Template.ServiceCPP(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, PackageName + "Service.cpp");
+                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Service.cpp");
                 file.Content = serviceCPPTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxNode.h
                 Template.NodeH nodeHTemplate = new Template.NodeH(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Public", "S" + PackageName, PackageName + "Node.h");
+                file.FileName = Path.Combine("Public", "S" + PackageName, FileName + "Node.h");
                 file.Content = nodeHTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxNode.cpp
                 Template.NodeCPP nodeCPPTemplate = new Template.NodeCPP(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, PackageName + "Node.cpp");
+                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Node.cpp");
                 file.Content = nodeCPPTemplate.TransformText();
                 GeneratedFiles.Add(file);
             }
@@ -151,13 +174,13 @@ namespace protoc_gen_turbolink
                 case FieldDescriptorProto.Types.Type.Group:
                     break; //TODO
                 case FieldDescriptorProto.Types.Type.Message:
-                    ueType += "FGrpc" + field.TypeName.Replace(".", String.Empty); break;
+                    ueType += GetMessageName(field.TypeName); break;
                 case FieldDescriptorProto.Types.Type.Bytes:
                     ueType += "FBytes"; break;
                 case FieldDescriptorProto.Types.Type.Uint32:
                     ueType += "FUInt32"; break;
                 case FieldDescriptorProto.Types.Type.Enum:
-                    ueType += "EGrpc" + field.TypeName.Replace(".", String.Empty); break;
+                    ueType += GetMessageName(field.TypeName).Replace("FGrpc", "EGrpc"); break;
                 case FieldDescriptorProto.Types.Type.Sfixed32:
                     ueType += "int32"; break;
                 case FieldDescriptorProto.Types.Type.Sfixed64:
@@ -185,7 +208,15 @@ namespace protoc_gen_turbolink
         public string GetMessageName(string valueType)
         {
             //EXAMPLE: .Time.NowResponse  => FGrpcTimeNowResponse
-            return "FGrpc" + valueType.Replace(".", null);
+            //EXAMPLE: authzed.api.v1.CheckRequest => AuthzedApiV1CheckRequest
+            string[] words = valueType.Split('.').ToArray();
+            string result = "FGrpc";
+            foreach (string word in words)
+            {
+                if (word.Length > 0)
+                    result += char.ToUpper(word[0]) + word.Substring(1);
+            }
+            return result;
         }
         public string GetMessageGrpcName(string valueType)
         {

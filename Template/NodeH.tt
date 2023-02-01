@@ -9,11 +9,11 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "TurboLinkGrpcClient.h"
-#include "<#=g.PackageName#>Message.h"
+#include "<#=g.FileName#>Message.h"
 <#
 if(g.ProtoFile.Service.Count>0) {
 #>
-#include "<#=g.PackageName#>Node.generated.h"
+#include "<#=g.FileName#>Node.generated.h"
 <#
 }
 #>
