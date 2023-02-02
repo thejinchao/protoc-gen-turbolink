@@ -22,6 +22,7 @@ namespace protoc_gen_turbolink
             CodeGeneratorResponse response = new CodeGeneratorResponse();
 
             StringBuilder inputFileNames = new StringBuilder();
+            HashSet<string> generatedFileNameSet = new HashSet<string>();
             foreach (FileDescriptorProto protoFile in request.ProtoFile)
             {
                 TurboLinkGenerator generator = new TurboLinkGenerator(protoFile);
@@ -31,10 +32,15 @@ namespace protoc_gen_turbolink
 
                 foreach (GeneratedFile generatedFile in generator.GeneratedFiles)
                 {
-                    CodeGeneratorResponse.Types.File newFile = new CodeGeneratorResponse.Types.File();
+                    if (generatedFileNameSet.Contains(generatedFile.FileName)) break;
+                    generatedFileNameSet.Add(generatedFile.FileName);
 
-                    newFile.Name = generatedFile.FileName;
-                    newFile.Content = generatedFile.Content;
+                    CodeGeneratorResponse.Types.File newFile = new CodeGeneratorResponse.Types.File
+                    {
+                        Name = generatedFile.FileName,
+                        Content = generatedFile.Content
+                    };
+
                     response.File.Add(newFile);
                 }
 
