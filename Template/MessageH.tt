@@ -11,6 +11,13 @@
 #include "<#=g.FileName#>Message.generated.h"
 
 <#
+foreach (string dependency in g.ProtoFile.Dependency)
+{
+#>
+#include "<#=g.GetDependencyMessagePath(dependency)#>Message.h"
+<#}#>
+
+<#
 foreach (EnumDescriptorProto enumDefine in g.ProtoFile.EnumType)
 {
 #>
