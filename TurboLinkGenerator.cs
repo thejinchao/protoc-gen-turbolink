@@ -45,6 +45,17 @@ namespace protoc_gen_turbolink
             return string.Join(string.Empty, words);
         }
 
+        public string GetDependencyMessagePath(string dependency)
+        {
+            // google/protobuf/struct.proto -> SGoogleProtobuf/StructMessage.h
+            var words = dependency.Split('/').ToArray();
+            if (words.Length <= 1)
+                return GetCamelFileName(dependency);
+            string packagePath = "S" + GetCamelPackageName(string.Join(".", words.Take(words.Length - 1)));
+            string fileName = GetCamelFileName(words.Last());
+            return packagePath + "/" + fileName;
+        }
+
         public bool Prepare()
 		{
             PackageName = GetCamelPackageName(ProtoFile.Package);
