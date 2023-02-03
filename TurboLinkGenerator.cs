@@ -69,20 +69,20 @@ namespace protoc_gen_turbolink
             // xxxMarshaling.h
             Template.MarshalingH marshalingHTemplate = new Template.MarshalingH(this);
             file = new GeneratedFile();
-            file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Marshaling.h");
+            file.FileName = string.Join("/", "Private", "S" + PackageName, FileName + "Marshaling.h");
             file.Content = marshalingHTemplate.TransformText();
             GeneratedFiles.Add(file);
 
             // xxxMarshaling.cpp
             Template.MarshalingCPP marshalingCPPTemplate = new Template.MarshalingCPP(this);
             file = new GeneratedFile();
-            file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Marshaling.cpp");
+            file.FileName = string.Join("/", "Private", "S" + PackageName, FileName + "Marshaling.cpp");
             file.Content = marshalingCPPTemplate.TransformText();
             GeneratedFiles.Add(file);
 
             // xxxMessage.h
             Template.MessageH messageHTemplate = new Template.MessageH(this);
-            file.FileName = Path.Combine("Public", "S" + PackageName, FileName + "Message.h");
+            file.FileName = string.Join("/", "Public", "S" + PackageName, FileName + "Message.h");
             file.Content = messageHTemplate.TransformText();
             GeneratedFiles.Add(file);
 
@@ -91,70 +91,70 @@ namespace protoc_gen_turbolink
                 // xxxService.h
                 Template.ServiceH serviceHTemplate = new Template.ServiceH(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Public", "S" + PackageName, FileName + "Service.h");
+                file.FileName = string.Join("/", "Public", "S" + PackageName, FileName + "Service.h");
                 file.Content = serviceHTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxClient.h
                 Template.ClientH clientHTemplate = new Template.ClientH(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Public", "S" + PackageName, FileName + "Client.h");
+                file.FileName = string.Join("/", "Public", "S" + PackageName, FileName + "Client.h");
                 file.Content = clientHTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxClient.cpp
                 Template.ClientCPP clientCPPTemplate = new Template.ClientCPP(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Client.cpp");
+                file.FileName = string.Join("/", "Private", "S" + PackageName, FileName + "Client.cpp");
                 file.Content = clientCPPTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxServicePrivate.h
                 Template.ServicePrivateH servicePrivateHTemplate = new Template.ServicePrivateH(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Service_Private.h");
+                file.FileName = string.Join("/", "Private", "S" + PackageName, FileName + "Service_Private.h");
                 file.Content = servicePrivateHTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxServicePrivate.cpp
                 Template.ServicePrivateCPP servicePrivateCPPTemplate = new Template.ServicePrivateCPP(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Service_Private.cpp");
+                file.FileName = string.Join("/", "Private", "S" + PackageName, FileName + "Service_Private.cpp");
                 file.Content = servicePrivateCPPTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxContext.h
                 Template.ContextH contextHTemplate = new Template.ContextH(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Context.h");
+                file.FileName = string.Join("/", "Private", "S" + PackageName, FileName + "Context.h");
                 file.Content = contextHTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxContext.cpp
                 Template.ContextCPP contextCPPTemplate = new Template.ContextCPP(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Context.cpp");
+                file.FileName = string.Join("/", "Private", "S" + PackageName, FileName + "Context.cpp");
                 file.Content = contextCPPTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxService.cpp
                 Template.ServiceCPP serviceCPPTemplate = new Template.ServiceCPP(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Service.cpp");
+                file.FileName = string.Join("/", "Private", "S" + PackageName, FileName + "Service.cpp");
                 file.Content = serviceCPPTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxNode.h
                 Template.NodeH nodeHTemplate = new Template.NodeH(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Public", "S" + PackageName, FileName + "Node.h");
+                file.FileName = string.Join("/", "Public", "S" + PackageName, FileName + "Node.h");
                 file.Content = nodeHTemplate.TransformText();
                 GeneratedFiles.Add(file);
 
                 // xxxNode.cpp
                 Template.NodeCPP nodeCPPTemplate = new Template.NodeCPP(this);
                 file = new GeneratedFile();
-                file.FileName = Path.Combine("Private", "S" + PackageName, FileName + "Node.cpp");
+                file.FileName = string.Join("/", "Private", "S" + PackageName, FileName + "Node.cpp");
                 file.Content = nodeCPPTemplate.TransformText();
                 GeneratedFiles.Add(file);
             }
