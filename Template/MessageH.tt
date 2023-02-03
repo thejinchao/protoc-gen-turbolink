@@ -62,6 +62,7 @@ List<string> currentNameList = new List<string>(parentNameList);
 currentNameList.Add(message.Name);
 foreach(DescriptorProto messageInMsg in message.NestedType)
 {
+    if(messageInMsg.Options!=null && messageInMsg.Options.MapEntry) continue;
     GenerateMessageClass(messageInMsg, currentNameList);
 }
 #>
@@ -75,7 +76,14 @@ foreach(FieldDescriptorProto field in message.Field)
 #>
 
     UPROPERTY(BlueprintReadWrite)
-<#+if(field.Label==FieldDescriptorProto.Types.Label.Repeated) { #>
+<#+ 
+bool isMapField;
+FieldDescriptorProto keyField, valueField; 
+(isMapField, keyField, valueField)=g.IsMapField(field, message);
+if(isMapField) { 
+#>
+    TMap<<#=g.GetFieldType(keyField)#>, <#=g.GetFieldType(valueField)#>> <#=g.GetFieldName(field)#>;
+<#+} else if(g.IsArrayField(field)) { #>
     TArray<<#=g.GetFieldType(field)#>> <#=g.GetFieldName(field)#>;
 <#+}else{#>
     <#=g.GetFieldType(field)#> <#=g.GetFieldName(field)#>;
