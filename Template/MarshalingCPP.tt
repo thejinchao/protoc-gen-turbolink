@@ -9,7 +9,7 @@
 
 <# 
 List<string> parentNameList = new List<string>();
-parentNameList.Add(g.PackageName);
+parentNameList = g.ProtoFile.Package.Split('.').ToList();
 
 foreach(DescriptorProto message in g.ProtoFile.MessageType)
 {
@@ -27,7 +27,7 @@ private void GenerateMessageMarshalingDefine(DescriptorProto message, List<strin
 		GenerateMessageMarshalingDefine(messageInMsg, currentNameList);
 	}
 #>
-void GRPC_TO_TURBOLINK(const ::<#=g.PrintNameList(parentNameList, "::")#>::<#=message.Name#>* in, FGrpc<#=g.PrintNameList(parentNameList, string.Empty)#><#=message.Name#>* out)
+void GRPC_TO_TURBOLINK(const ::<#=g.PrintNameList(parentNameList, "::")#>::<#=message.Name#>* in, FGrpc<#=g.PrintNameList(parentNameList, string.Empty, true)#><#=message.Name#>* out)
 {
 <#+
     foreach(FieldDescriptorProto field in message.Field)
@@ -66,7 +66,7 @@ void GRPC_TO_TURBOLINK(const ::<#=g.PrintNameList(parentNameList, "::")#>::<#=me
 #>
 }
 
-void TURBOLINK_TO_GRPC(const FGrpc<#=g.PrintNameList(parentNameList, string.Empty)#><#=message.Name#>* in, ::<#=g.PrintNameList(parentNameList, "::")#>::<#=message.Name#>* out)
+void TURBOLINK_TO_GRPC(const FGrpc<#=g.PrintNameList(parentNameList, string.Empty, true)#><#=message.Name#>* in, ::<#=g.PrintNameList(parentNameList, "::")#>::<#=message.Name#>* out)
 {
 <#+
     foreach(FieldDescriptorProto field in message.Field)

@@ -60,6 +60,7 @@ namespace protoc_gen_turbolink
 		{
             PackageName = GetCamelPackageName(ProtoFile.Package);
             FileName = GetCamelFileName(ProtoFile.Name);
+            System.IO.Path.ChangeExtension(ProtoFile.Name, String.Empty);
             return true;
         }
         public void BuildOutputFiles()
@@ -273,12 +274,15 @@ namespace protoc_gen_turbolink
             }
             return counts;
         }
-        public string PrintNameList(List<string> parentNameList, string dotChar)
+        public string PrintNameList(List<string> parentNameList, string dotChar, bool useCamel = false)
         {
             StringBuilder output = new StringBuilder();
             foreach (string n in parentNameList)
             {
-                output.Append(n);
+                string tmp = n;
+                if (useCamel)
+                    tmp = char.ToUpper(n[0]) + n.Substring(1);
+                output.Append(tmp);
                 if (dotChar != string.Empty) output.Append(dotChar);
             }
             if (dotChar!=string.Empty && output.Length > dotChar.Length)

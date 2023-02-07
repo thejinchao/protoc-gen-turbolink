@@ -9,7 +9,7 @@
 
 #include "S<#=g.PackageName#>/<#=g.FileName#>Service.h"
 #include "TurboLinkGrpcManager_Private.h"
-#include "pb/<#=System.IO.Path.GetFileNameWithoutExtension(g.ProtoFile.Name)#>.grpc.pb.h"
+#include "pb/<#=System.IO.Path.ChangeExtension(g.ProtoFile.Name, "grpc.pb.h")#>"
 <#
 if(g.GetNoneClientStreamingFunctionCounts(g.ProtoFile)>0) {
 #>
