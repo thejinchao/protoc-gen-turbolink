@@ -12,6 +12,7 @@
 #include "TurboLinkGrpcManager_Private.h"
 #include "TurboLinkGrpcUtilities.h"
 <#
+List<string> parentNameList = g.ProtoFile.Package.Split('.').ToList();
 foreach (ServiceDescriptorProto service in g.ProtoFile.Service)
 {
 #>
@@ -35,7 +36,7 @@ void U<#=service.Name#>::Connect()
 		d->Channel = TurboLinkManager->d->CreateServiceChannel(TCHAR_TO_UTF8(*serviceEndPoint), this);
 	}
 	if (d->Stub == nullptr) {
-		d->Stub = ::<#=g.PackageName#>::<#=service.Name#>::NewStub(d->Channel->RpcChannel);
+		d->Stub = <#=g.PrintNameList(parentNameList, "::")#>::<#=service.Name#>::NewStub(d->Channel->RpcChannel);
 	}
 
 	grpc_connectivity_state currentChannelState = d->Channel->RpcChannel->GetState(true);

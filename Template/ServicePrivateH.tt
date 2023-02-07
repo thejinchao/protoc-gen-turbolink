@@ -19,6 +19,7 @@ if(g.GetNoneClientStreamingFunctionCounts(g.ProtoFile)>0) {
 #>
 
 <#
+List<string> parentNameList = g.ProtoFile.Package.Split('.').ToList();
 foreach (ServiceDescriptorProto service in g.ProtoFile.Service)
 {
 #>
@@ -26,7 +27,7 @@ class U<#=service.Name#>::Private
 {
 public:
 	std::shared_ptr<UTurboLinkGrpcManager::Private::ServiceChannel> Channel;
-	std::unique_ptr<::<#=g.PackageName#>::<#=service.Name#>::Stub> Stub;
+	std::unique_ptr<::<#=g.PrintNameList(parentNameList, "::")#>::<#=service.Name#>::Stub> Stub;
 };
 <#
 }
