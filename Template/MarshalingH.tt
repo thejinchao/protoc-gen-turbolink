@@ -45,6 +45,7 @@ private void GenerateMessageMarshalingDeclare(DescriptorProto message, List<stri
 
 	foreach(DescriptorProto messageInMsg in message.NestedType)
 	{
+		if(messageInMsg.Options!=null && messageInMsg.Options.MapEntry) continue;
 		GenerateMessageMarshalingDeclare(messageInMsg, currentNameList);
 	}
 #>

@@ -171,6 +171,38 @@ namespace protoc_gen_turbolink
             }
             return ueType;
         }
+        public bool IsArrayField(FieldDescriptorProto field)
+		{
+            return field.Label == FieldDescriptorProto.Types.Label.Repeated;
+        }
+        public (bool, FieldDescriptorProto, FieldDescriptorProto) IsMapField(FieldDescriptorProto field, DescriptorProto message)
+        {
+            if (field.Label != FieldDescriptorProto.Types.Label.Repeated) return (false, null, null);
+            if (field.Type != FieldDescriptorProto.Types.Type.Message) return (false, null, null);
+            int lastdot = field.TypeName.LastIndexOf('.');
+            if (lastdot > 0)
+			{
+                string mapEntryName = field.TypeName.Substring(lastdot + 1);
+                //search in nested message
+                foreach (DescriptorProto messageInMsg in message.NestedType)
+				{
+                   if (messageInMsg.Name == mapEntryName && 
+                        messageInMsg.Options!=null && messageInMsg.Options.MapEntry &&
+                        messageInMsg.Field.Count()==2)
+					{
+                        if(messageInMsg.Field[0].Name=="key" && messageInMsg.Field[1].Name == "value")
+						{
+                            return (true, messageInMsg.Field[0], messageInMsg.Field[1]);
+						}
+                        else if(messageInMsg.Field[1].Name == "key" && messageInMsg.Field[0].Name == "value")
+						{
+                            return (true, messageInMsg.Field[1], messageInMsg.Field[0]);
+                        }
+                    }
+				}
+            }
+            return (false, null, null);
+        }
         public string GetFieldName(FieldDescriptorProto field)
         {
             //EXAMPLE: some_thing => SomeThing
