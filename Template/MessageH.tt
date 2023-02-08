@@ -92,7 +92,7 @@ if(isMapField) {
 <#+} else if(g.IsArrayField(field)) { #>
     TArray<<#=g.GetFieldType(field)#>> <#=g.GetFieldName(field)#>;
 <#+}else{#>
-    <#=g.GetFieldType(field)#> <#=g.GetFieldName(field)#>;
+    <#=g.GetFieldType(field)#> <#=g.GetFieldName(field)#><#=g.GetFieldDefaultValue(field)#>;
 <#+}#>
 <#+
 }
