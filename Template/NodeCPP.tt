@@ -97,7 +97,7 @@ void UCall<#=service.Name#><#=method.Name#>::Shutdown()
 	}
 
 	SetReadyToDestroy();
-	MarkPendingKill();
+	MarkAsGarbage();
 }
 <#
 		}
