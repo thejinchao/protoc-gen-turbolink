@@ -206,6 +206,37 @@ namespace protoc_gen_turbolink
             }
             return ueType;
         }
+
+        public string GetFieldDefaultValue(FieldDescriptorProto field)
+        {
+            string defaultValue = " = ";
+            switch (field.Type)
+            {
+                case FieldDescriptorProto.Types.Type.Double:
+                case FieldDescriptorProto.Types.Type.Float:
+                case FieldDescriptorProto.Types.Type.Int64:
+                case FieldDescriptorProto.Types.Type.Uint64:
+                case FieldDescriptorProto.Types.Type.Int32:
+                case FieldDescriptorProto.Types.Type.Fixed64:
+                case FieldDescriptorProto.Types.Type.Fixed32:
+                case FieldDescriptorProto.Types.Type.Uint32:
+                case FieldDescriptorProto.Types.Type.Sfixed32:
+                case FieldDescriptorProto.Types.Type.Sfixed64:
+                case FieldDescriptorProto.Types.Type.Sint32:
+                case FieldDescriptorProto.Types.Type.Sint64:
+                    defaultValue += "0"; break;
+                case FieldDescriptorProto.Types.Type.Bool:
+                    defaultValue += "false"; break;
+                case FieldDescriptorProto.Types.Type.String:
+                    defaultValue += "\"\""; break;
+                case FieldDescriptorProto.Types.Type.Enum:
+                    defaultValue += "static_cast<" + GetFieldType(field) + ">(0)"; break;
+                default:
+                    return "";
+            }
+            return defaultValue;
+        }
+
         public bool IsArrayField(FieldDescriptorProto field)
 		{
             return field.Label == FieldDescriptorProto.Types.Label.Repeated;

@@ -97,7 +97,11 @@ void UCall<#=service.Name#><#=method.Name#>::Shutdown()
 	}
 
 	SetReadyToDestroy();
+#if ENGINE_MAJOR_VERSION>=5
+	MarkAsGarbage();
+#else
 	MarkPendingKill();
+#endif
 }
 <#
 		}
