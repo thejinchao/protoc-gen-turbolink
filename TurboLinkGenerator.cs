@@ -16,15 +16,17 @@ namespace protoc_gen_turbolink
     public class TurboLinkGenerator
     {
         public FileDescriptorProto ProtoFile;
+        Dictionary<string, string> DependencyFilesMap;
         public string PackageName;
         public string FileName;
 
         public List<GeneratedFile> GeneratedFiles = new List<GeneratedFile>();
-        public TurboLinkGenerator(FileDescriptorProto protoFile)
+        public TurboLinkGenerator(FileDescriptorProto protoFile, Dictionary<string, string> dependencyFilesMap)
         {
             ProtoFile = protoFile;
+            DependencyFilesMap = dependencyFilesMap;
         }
-        string GetCamelPackageName(string input)
+        public static string GetCamelPackageName(string input)
         {
             string[] words = input.Split('.').ToArray();
             string result = "";
@@ -48,6 +50,15 @@ namespace protoc_gen_turbolink
         public string GetDependencyMessagePath(string dependency)
         {
             // google/protobuf/struct.proto -> SGoogleProtobuf/StructMessage.h
+
+            //get dependency message filename from dependency file map 
+            string packageName;
+            if(DependencyFilesMap.TryGetValue(dependency, out packageName))
+            {
+                return "S" + packageName + "/" + GetCamelFileName(dependency);
+            }
+			
+            //should not happen...
             var words = dependency.Split('/').ToArray();
             if (words.Length <= 1)
                 return GetCamelFileName(dependency);

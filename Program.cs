@@ -21,10 +21,17 @@ namespace protoc_gen_turbolink
             //create code generator reponse
             CodeGeneratorResponse response = new CodeGeneratorResponse();
 
+            //create dependency files map
+            Dictionary<string, string> dependencyFilesMap = new Dictionary<string, string>();
+            foreach (FileDescriptorProto protoFile in request.ProtoFile)
+            {
+                dependencyFilesMap.Add(protoFile.Name, TurboLinkGenerator.GetCamelPackageName(protoFile.Package));
+            }
+            
             StringBuilder inputFileNames = new StringBuilder();
             foreach (FileDescriptorProto protoFile in request.ProtoFile)
             {
-                TurboLinkGenerator generator = new TurboLinkGenerator(protoFile);
+                TurboLinkGenerator generator = new TurboLinkGenerator(protoFile, dependencyFilesMap);
 
                 generator.Prepare();
                 generator.BuildOutputFiles();
