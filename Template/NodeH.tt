@@ -44,7 +44,7 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(F<#=service.Name#><#=method.Name#>Delegate, const FGrpcResult&, Result, const <#=g.GetMessageName(method.OutputType)#>&, Response);
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject", DisplayName = "Call <#=service.Name#> <#=method.Name#>"), Category = "TurboLink|<#=service.Name#>")
-	static UCall<#=service.Name#><#=method.Name#>* <#=method.Name#>(const <#=g.GetMessageName(method.InputType)#>& Request);
+	static UCall<#=service.Name#><#=method.Name#>* <#=method.Name#>(UObject* WorldContextObject, const <#=g.GetMessageName(method.InputType)#>& Request);
 
 	UPROPERTY(BlueprintAssignable)
 	F<#=service.Name#><#=method.Name#>Delegate OnSuccess;
