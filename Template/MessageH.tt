@@ -75,7 +75,7 @@ foreach(DescriptorProto messageInMsg in message.NestedType)
 USTRUCT(BlueprintType, meta = (DisplayName="<#=g.PrintNameList(parentNameList, ".", true)#>.<#=message.Name#>"))
 struct FGrpc<#=g.PrintNameList(parentNameList, string.Empty, true)#><#=message.Name#> : public FGrpcMessage
 {
-    GENERATED_USTRUCT_BODY()
+    GENERATED_BODY()
 <#+
 foreach(FieldDescriptorProto field in message.Field)
 {
