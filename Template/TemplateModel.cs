@@ -37,6 +37,11 @@ namespace protoc_gen_turbolink.Template
         private TurboLinkGenerator g;
         public MessageH(TurboLinkGenerator _g) { g = _g; }
     }
+    partial class MessageCPP
+    {
+        private TurboLinkGenerator g;
+        public MessageCPP(TurboLinkGenerator _g) { g = _g; }
+    }
     partial class ServiceCPP
     {
         private TurboLinkGenerator g;

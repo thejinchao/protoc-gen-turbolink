@@ -98,6 +98,12 @@ namespace protoc_gen_turbolink
             file.Content = messageHTemplate.TransformText();
             GeneratedFiles.Add(file);
 
+            // xxxMessage.cpp
+            Template.MessageCPP messageCPPTemplate = new Template.MessageCPP(this);
+            file.FileName = string.Join("/", "Private", "S" + PackageName, FileName + "Message.cpp");
+            file.Content = messageCPPTemplate.TransformText();
+            GeneratedFiles.Add(file);
+
             if (ProtoFile.Service.Count > 0)
             {
                 // xxxService.h
