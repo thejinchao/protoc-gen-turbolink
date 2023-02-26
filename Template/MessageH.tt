@@ -9,96 +9,44 @@
 #pragma once
 #include "TurboLinkGrpcMessage.h"
 <#
-foreach (string dependency in g.ProtoFile.Dependency)
+foreach (string dependency in s.DependencyFiles)
 {
 #>
-#include "<#=g.GetDependencyMessagePath(dependency)#>Message.h"
+#include "<#=dependency#>Message.h"
 <#}#>
-#include "<#=g.FileName#>Message.generated.h"
+#include "<#=s.CamelFileName#>Message.generated.h"
+<#
+foreach (GrpcEnum enumDefine in s.EnumArray)
+{
+#>
 
-<#
-foreach (EnumDescriptorProto enumDefine in g.ProtoFile.EnumType)
-{
-#>
-UENUM(BlueprintType, meta = (DisplayName="<#=g.PackageName#>.<#=enumDefine.Name#>"))
-enum class EGrpc<#=g.PackageName#><#=enumDefine.Name#> : uint8
+UENUM(BlueprintType, meta = (DisplayName="<#=enumDefine.DisplayName#>"))
+enum class <#=enumDefine.Name#> : uint8
 {
 <#
-foreach (EnumValueDescriptorProto enumValue in enumDefine.Value)
+foreach (GrpcEnumField enumField in enumDefine.Fields)
 {
 #>
-    <#=enumValue.Name#>=<#=enumValue.Number#>,
+    <#=enumField.Name#>=<#=enumField.Number#>,
 <#}#>
 };
 <#}#>
-
 <# 
-List<string> parentNameList = new List<string>();
-parentNameList = g.ProtoFile.Package.Split('.').ToList();
+foreach(GrpcMessage message in s.MessageArray)
+{
+#>
 
-foreach(DescriptorProto message in g.ProtoFile.MessageType)
-{
-    GenerateMessageClass(message, parentNameList);
-#>
-<#
-}
-#>
-<#+
-private void GenerateMessageClass(DescriptorProto message, List<string> parentNameList)
-{
-#>
-<#+
-foreach(EnumDescriptorProto enumInMsgDefine in message.EnumType)
-{
-#>
-UENUM(BlueprintType, meta = (DisplayName = "<#=g.PrintNameList(parentNameList, ".", true)#>.<#=message.Name#>.<#=enumInMsgDefine.Name#>"))
-enum class EGrpc<#=g.PrintNameList(parentNameList, string.Empty, true)#><#=message.Name#><#=enumInMsgDefine.Name#> : uint8
-{
-<#+
-    foreach (EnumValueDescriptorProto enumValue in enumInMsgDefine.Value)
-    {
-#>
-    <#=enumValue.Name#>=<#=enumValue.Number#>,
-<#+ } #>
-};
-
-<#+ } #>
-<#+
-List<string> currentNameList = new List<string>(parentNameList);
-currentNameList.Add(message.Name);
-foreach(DescriptorProto messageInMsg in message.NestedType)
-{
-    if(messageInMsg.Options!=null && messageInMsg.Options.MapEntry) continue;
-    GenerateMessageClass(messageInMsg, currentNameList);
-}
-#>
-USTRUCT(BlueprintType, meta = (DisplayName="<#=g.PrintNameList(parentNameList, ".", true)#>.<#=message.Name#>"))
-struct FGrpc<#=g.PrintNameList(parentNameList, string.Empty, true)#><#=message.Name#> : public FGrpcMessage
+USTRUCT(BlueprintType, meta = (DisplayName="<#=message.DisplayName#>"))
+struct <#=message.Name#> : public FGrpcMessage
 {
     GENERATED_BODY()
-<#+
-foreach(FieldDescriptorProto field in message.Field)
+<#
+foreach(GrpcMessageField field in message.Fields)
 {
 #>
 
     UPROPERTY(BlueprintReadWrite)
-<#+ 
-bool isMapField;
-FieldDescriptorProto keyField, valueField; 
-(isMapField, keyField, valueField)=g.IsMapField(field, message);
-if(isMapField) { 
-#>
-    TMap<<#=g.GetFieldType(keyField)#>, <#=g.GetFieldType(valueField)#>> <#=g.GetFieldName(field)#>;
-<#+} else if(g.IsArrayField(field)) { #>
-    TArray<<#=g.GetFieldType(field)#>> <#=g.GetFieldName(field)#>;
-<#+}else{#>
-    <#=g.GetFieldType(field)#> <#=g.GetFieldName(field)#><#=g.GetFieldDefaultValue(field)#>;
-<#+}#>
-<#+
-}
-#>
+    <#=field.FieldType#> <#=field.FieldName#><#=field.FieldDefaultValue#>;
+<#}#>
 };
-
-<#+
-}
-#>
+<#}#>

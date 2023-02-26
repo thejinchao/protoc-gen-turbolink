@@ -20,20 +20,23 @@ namespace protoc_gen_turbolink
 
             //create code generator reponse
             CodeGeneratorResponse response = new CodeGeneratorResponse();
+            //supported features(optional field)
+            response.SupportedFeatures = (ulong)CodeGeneratorResponse.Types.Feature.Proto3Optional;
 
-            //create dependency files map
-            Dictionary<string, string> dependencyFilesMap = new Dictionary<string, string>();
-            foreach (FileDescriptorProto protoFile in request.ProtoFile)
+            //gather and analysis information from all service files
+            TurboLinkCollection collection = new TurboLinkCollection();
+            string error;
+            if (!collection.AnalysisServiceFiles(request, out error))
             {
-                dependencyFilesMap.Add(protoFile.Name, TurboLinkGenerator.GetCamelPackageName(protoFile.Package));
+                //no go!
+                response.Error = error;
+                WriteResponse(response);
+                return;
             }
-            
-            StringBuilder inputFileNames = new StringBuilder();
+
             foreach (FileDescriptorProto protoFile in request.ProtoFile)
             {
-                TurboLinkGenerator generator = new TurboLinkGenerator(protoFile, dependencyFilesMap);
-
-                generator.Prepare();
+                TurboLinkGenerator generator = new TurboLinkGenerator(protoFile, collection.GrpcServiceFiles[protoFile.Name]);
                 generator.BuildOutputFiles();
 
                 foreach (GeneratedFile generatedFile in generator.GeneratedFiles)
@@ -44,19 +47,24 @@ namespace protoc_gen_turbolink
                     newFile.Content = generatedFile.Content;
                     response.File.Add(newFile);
                 }
-
-                inputFileNames.Append(System.IO.Path.GetFileNameWithoutExtension(protoFile.Name)+"_");
             }
-
-            //debug file
-            //CodeGeneratorResponse.Types.File file = new CodeGeneratorResponse.Types.File();
-            //file.Name = inputFileNames.ToString() + "dump.json";
-            //file.Content = string.Format("{0}", request.ToString());
-            //response.File.Add(file);
-
-            //supported features(optional field)
-            response.SupportedFeatures = (ulong)CodeGeneratorResponse.Types.Feature.Proto3Optional;
-
+            /*
+            //dump input request
+            CodeGeneratorResponse.Types.File request_file = new CodeGeneratorResponse.Types.File();
+            request_file.Name = collection.InputFileNames + "request.json";
+            request_file.Content = request.ToString();
+            response.File.Add(request_file);
+            
+            //dump service collection
+            CodeGeneratorResponse.Types.File service_collection = new CodeGeneratorResponse.Types.File();
+            service_collection.Name = collection.InputFileNames + "collection.json";
+            service_collection.Content = collection.DumpToString();
+            response.File.Add(service_collection);
+            */
+            WriteResponse(response);
+        }
+        private static void WriteResponse(CodeGeneratorResponse response)
+		{
             //write response from standard output to grpc
             byte[] data = new byte[response.CalculateSize()];
             Google.Protobuf.CodedOutputStream outputStream = new Google.Protobuf.CodedOutputStream(data);

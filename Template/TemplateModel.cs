@@ -4,72 +4,72 @@ namespace protoc_gen_turbolink.Template
 {
     partial class ClientCPP
     {
-        private TurboLinkGenerator g;
-        public ClientCPP(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public ClientCPP(GrpcServiceFile _s) { s = _s; }
     }
     partial class ClientH
     {
-        private TurboLinkGenerator g;
-        public ClientH(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public ClientH(GrpcServiceFile _s) {s = _s; }
     }
     partial class ContextCPP
     {
-        private TurboLinkGenerator g;
-        public ContextCPP(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public ContextCPP(GrpcServiceFile _s) { s = _s; }
     }
     partial class ContextH
     {
-        private TurboLinkGenerator g;
-        public ContextH(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public ContextH(GrpcServiceFile _s) { s = _s; }
     }
     partial class MarshalingCPP
     {
-        private TurboLinkGenerator g;
-        public MarshalingCPP(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public MarshalingCPP(GrpcServiceFile _s) { s = _s; }
     }
     partial class MarshalingH
     {
-        private TurboLinkGenerator g;
-        public MarshalingH(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public MarshalingH(GrpcServiceFile _s) { s = _s; }
     }
     partial class MessageH
     {
-        private TurboLinkGenerator g;
-        public MessageH(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public MessageH(GrpcServiceFile _s) { s = _s; }
     }
     partial class MessageCPP
     {
-        private TurboLinkGenerator g;
-        public MessageCPP(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public MessageCPP(GrpcServiceFile _s) { s = _s; }
     }
     partial class ServiceCPP
     {
-        private TurboLinkGenerator g;
-        public ServiceCPP(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public ServiceCPP(GrpcServiceFile _s) { s = _s; }
     }
     partial class ServiceH
     {
-        private TurboLinkGenerator g;
-        public ServiceH(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public ServiceH(GrpcServiceFile _s) { s = _s; }
     }
     partial class ServicePrivateH
     {
-        private TurboLinkGenerator g;
-        public ServicePrivateH(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public ServicePrivateH(GrpcServiceFile _s) { s = _s; }
     }
     partial class ServicePrivateCPP
     {
-        private TurboLinkGenerator g;
-        public ServicePrivateCPP(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public ServicePrivateCPP(GrpcServiceFile _s) { s = _s; }
     }
     partial class NodeH
     {
-        private TurboLinkGenerator g;
-        public NodeH(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public NodeH(GrpcServiceFile _s) { s = _s; }
     }
     partial class NodeCPP
     {
-        private TurboLinkGenerator g;
-        public NodeCPP(TurboLinkGenerator _g) { g = _g; }
+        private GrpcServiceFile s;
+        public NodeCPP(GrpcServiceFile _s) { s = _s; }
     }
 }

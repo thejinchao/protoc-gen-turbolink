@@ -9,20 +9,20 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "TurboLinkGrpcClient.h"
-#include "<#=g.FileName#>Message.h"
+#include "<#=s.CamelFileName#>Message.h"
 <#
-if(g.ProtoFile.Service.Count>0) {
+if(s.ServiceArray.Count>0) {
 #>
-#include "<#=g.FileName#>Node.generated.h"
+#include "<#=s.CamelFileName#>Node.generated.h"
 <#
 }
 #>
 
 <#
-foreach (ServiceDescriptorProto service in g.ProtoFile.Service)
+foreach(GrpcService service in s.ServiceArray)
 {
 	int pingPongMethodCounts=0;
-	foreach (MethodDescriptorProto method in service.Method) {
+	foreach (GrpcServiceMethod method in service.MethodArray) {
 		if(!method.ClientStreaming && !method.ServerStreaming) pingPongMethodCounts++;
 	}
 	if(pingPongMethodCounts==0) continue;
@@ -30,7 +30,7 @@ foreach (ServiceDescriptorProto service in g.ProtoFile.Service)
 class U<#=service.Name#>;
 class U<#=service.Name#>Client;
 <#
-foreach (MethodDescriptorProto method in service.Method)
+foreach (GrpcServiceMethod method in service.MethodArray)
 {
 	if(!method.ClientStreaming && !method.ServerStreaming) {
 #>
@@ -41,10 +41,10 @@ class TURBOLINKGRPC_API UCall<#=service.Name#><#=method.Name#> : public UBluepri
 	GENERATED_BODY()
 
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(F<#=service.Name#><#=method.Name#>Delegate, const FGrpcResult&, Result, const <#=g.GetMessageName(method.OutputType)#>&, Response);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(F<#=service.Name#><#=method.Name#>Delegate, const FGrpcResult&, Result, const <#=method.OutputType#>&, Response);
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject", DisplayName = "Call <#=service.Name#> <#=method.Name#>"), Category = "TurboLink|<#=service.Name#>")
-	static UCall<#=service.Name#><#=method.Name#>* <#=method.Name#>(UObject* WorldContextObject, const <#=g.GetMessageName(method.InputType)#>& Request);
+	static UCall<#=service.Name#><#=method.Name#>* <#=method.Name#>(UObject* WorldContextObject, const <#=method.InputType#>& Request);
 
 	UPROPERTY(BlueprintAssignable)
 	F<#=service.Name#><#=method.Name#>Delegate OnSuccess;
@@ -60,7 +60,7 @@ private:
 	U<#=service.Name#>Client* <#=service.Name#>Client;
 	
 	FGrpcContextHandle Context;
-	<#=g.GetMessageName(method.InputType)#> Request;
+	<#=method.InputType#> Request;
 
 	UFUNCTION()
 	void OnServiceStateChanged(EGrpcServiceState NewState);
@@ -69,7 +69,7 @@ private:
 	void OnContextStateChange(FGrpcContextHandle Handle, EGrpcContextState State);
 
 	UFUNCTION()
-	void OnResponse(FGrpcContextHandle Handle, const FGrpcResult& Result, const <#=g.GetMessageName(method.OutputType)#>& Response);
+	void OnResponse(FGrpcContextHandle Handle, const FGrpcResult& Result, const <#=method.OutputType#>& Response);
 
 	void Shutdown();
 };
