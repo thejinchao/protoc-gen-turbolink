@@ -21,10 +21,6 @@ namespace protoc_gen_turbolink
             }
             return result;
         }
-        public static string GetGrpcName(string input)
-		{
-            return input.Replace(".", "::");
-		}
         //eg. "common.proto" -> "Common"
         //eg. "google/protobuf/field_mask.proto" -> "FieldMask"
         public static string GetCamelFileName(string input)
@@ -164,12 +160,11 @@ namespace protoc_gen_turbolink
             }
             return (false, null, null);
         }
-        public static string GetContextSuperClass(ServiceDescriptorProto service, GrpcServiceMethod method)
+        public static string GetContextSuperClass(MethodDescriptorProto method)
         {
-            StringBuilder superClass = new StringBuilder();
             if (method.ClientStreaming && method.ServerStreaming)
             {
-                superClass.Append("GrpcContext_Stream_Stream");
+                return "GrpcContext_Stream_Stream";
             }
             else if (method.ClientStreaming && !method.ServerStreaming)
             {
@@ -177,20 +172,12 @@ namespace protoc_gen_turbolink
             }
             else if (!method.ClientStreaming && method.ServerStreaming)
             {
-                superClass.Append("GrpcContext_Ping_Stream");
+                return "GrpcContext_Ping_Stream";
             }
             else
             {
-                superClass.Append("GrpcContext_Ping_Pong");
+                return "GrpcContext_Ping_Pong";
             }
-
-            superClass.Append("<" + service.Name + "_" + method.Name + "_ReaderWriter, ");
-            superClass.Append(method.GrpcOutputType);
-            if (method.ClientStreaming)
-                superClass.Append(", " + method.GrpcInputType);
-            superClass.Append(">");
-
-            return superClass.ToString();
         }
     }
 }

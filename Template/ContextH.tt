@@ -14,11 +14,16 @@ foreach(GrpcService service in s.ServiceArray)
 {
 	foreach (GrpcServiceMethod method in service.MethodArray)
 	{
+		string superClass = method.ContextSuperClass;
+		superClass += "<" + service.Name + "_" + method.Name + "_ReaderWriter, " + method.GrpcOutputType;
+		if (method.ClientStreaming)
+			superClass += ", " + method.GrpcInputType;
+		superClass += ">";
 #>
-class GrpcContext_<#=service.Name#>_<#=method.Name#> : public <#=method.ContextSuperClass#>
+class GrpcContext_<#=service.Name#>_<#=method.Name#> : public <#=superClass#>
 {
 	friend class U<#=service.Name#>Client;
-	typedef <#=method.ContextSuperClass#> Super;
+	typedef <#=superClass#> Super;
 
 private:
 <#

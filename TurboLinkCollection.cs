@@ -92,35 +92,95 @@ namespace protoc_gen_turbolink
 		public string DisplayName { get; set; }					//eg. "Greeter.HelloResponse", "GoogleProtobuf.Value"
 		public List<GrpcMessageField> Fields { get; set; }
 	}
-	public struct GrpcServiceMethod
+	public class GrpcServiceMethod
 	{
-		public string Name { get; set; }
-		public bool ClientStreaming { get; set; }
-		public bool ServerStreaming { get; set; }
-		public string InputType { get; set; }               //eg. "FGrpcUserRegisterRequest"
-		public string GrpcInputType { get; set; }           //eg. "::User::RegisterRequest"
-		public string OutputType { get; set; }              //eg. "FGrpcUserRegisterResponse"
-		public string GrpcOutputType { get; set; }          //eg. "::User::RegisterResponse"
-		public string ContextSuperClass { get; set; }       //eg. "GrpcContext_Ping_Pong<UserService_Register_ReaderWriter, ::User::RegisterResponse>"
+		public MethodDescriptorProto MethodDesc;
+		public string Name
+		{
+			get => MethodDesc.Name;
+		}
+		public bool ClientStreaming
+		{
+			get => MethodDesc.ClientStreaming;
+		}
+		public bool ServerStreaming
+		{
+			get => MethodDesc.ServerStreaming;
+		}
+		public string InputType                             //eg. "FGrpcUserRegisterRequest"
+		{
+			get => TurboLinkUtils.GetMessageName(MethodDesc.InputType);
+		}
+		public string GrpcInputType                         //eg. "::User::RegisterRequest"
+		{
+			get => MethodDesc.InputType.Replace(".", "::");
+		}
+		public string OutputType                            //eg. "FGrpcUserRegisterResponse"
+		{
+			get => TurboLinkUtils.GetMessageName(MethodDesc.OutputType);
+		}
+		public string GrpcOutputType                        //eg. "::User::RegisterResponse"
+		{
+			get => MethodDesc.OutputType.Replace(".", "::");
+		}
+		public string ContextSuperClass                     //eg. "GrpcContext_Ping_Pong", "GrpcContext_Ping_Stream"
+		{
+			get => TurboLinkUtils.GetContextSuperClass(MethodDesc);
+		}
+		public GrpcServiceMethod(MethodDescriptorProto methodDesc)
+		{
+			MethodDesc = methodDesc;
+		}
 	}
-	public struct GrpcService
+	public class GrpcService
 	{
-		public string Name { get; set; }					//eg. "UserService"
+		public readonly ServiceDescriptorProto ServiceDesc;
+		public string Name                                      //eg. "UserService"
+		{
+			get => ServiceDesc.Name;
+		}
 		public List<GrpcServiceMethod> MethodArray { get; set; }
+
+		public GrpcService(ServiceDescriptorProto serviceDesc)
+		{
+			ServiceDesc = serviceDesc;
+		}
 	}
-	public struct GrpcServiceFile
+	public class GrpcServiceFile
 	{
-		public FileDescriptorProto ProtoFile;
-		public string FileName { get; set; }                //eg. "hello.proto", "google/protobuf/struct.proto"
-		public string CamelFileName { get; set; }			//eg. "Hello", "Struct"
-		public string PackageName { get; set; }				//eg. "Greeter", "google.protobuf"
-		public string CamelPackageName { get; set; }		//eg. "Greeter", "GoogleProtobuf"
-		public string GrpcPackageName { get; set; }			//eg. "Greeter", "google::protobuf"
-		public string TurboLinkBasicFileName { get; set; }	//eg. "SGreeter/Hello", "SGoogleProtobuf/Struct"
+		public readonly FileDescriptorProto ProtoFileDesc;
+		public string FileName								//eg. "hello.proto", "google/protobuf/struct.proto"
+		{
+			get => ProtoFileDesc.Name;
+		}
+		public string CamelFileName                         //eg. "Hello", "Struct"
+		{
+			get => TurboLinkUtils.GetCamelFileName(FileName);
+		}
+		public string PackageName                           //eg. "Greeter", "google.protobuf"
+		{
+			get => ProtoFileDesc.Package;
+		}
+		public string CamelPackageName                      //eg. "Greeter", "GoogleProtobuf"
+		{
+			get => TurboLinkUtils.GetCamelPackageName(PackageName);
+		}
+		public string GrpcPackageName                       //eg. "Greeter", "google::protobuf"
+		{
+			get => PackageName.Replace(".", "::");
+		}
+		public string TurboLinkBasicFileName                //eg. "SGreeter/Hello", "SGoogleProtobuf/Struct"
+		{
+			get => "S" + CamelPackageName + "/" + CamelFileName;
+		}
 		public List<string> DependencyFiles { get; set; }	
 		public List<GrpcEnum> EnumArray { get; set; }
 		public List<GrpcMessage> MessageArray { get; set; }
 		public List<GrpcService> ServiceArray { get; set; }
+		public GrpcServiceFile(FileDescriptorProto protoFileDesc)
+		{
+			ProtoFileDesc = protoFileDesc;
+		}
 	}
 	public class TurboLinkCollection
 	{
@@ -137,7 +197,7 @@ namespace protoc_gen_turbolink
 			//step 1: gather service information
 			foreach (FileDescriptorProto protoFile in request.ProtoFile)
 			{
-				GatherServiceInfomation(protoFile);
+				GrpcServiceFiles.Add(protoFile.Name, new GrpcServiceFile(protoFile));
 				inputFileNames.Insert(0, System.IO.Path.GetFileNameWithoutExtension(protoFile.Name) + "_");
 			}
 			InputFileNames = inputFileNames.ToString();
@@ -167,27 +227,12 @@ namespace protoc_gen_turbolink
 
 			return true;
 		}
-		private void GatherServiceInfomation(FileDescriptorProto protoFile)
-		{
-			//basic infomation
-			GrpcServiceFile serviceFile = new GrpcServiceFile();
-			serviceFile.ProtoFile = protoFile;
-			serviceFile.FileName = protoFile.Name;
-			serviceFile.CamelFileName = TurboLinkUtils.GetCamelFileName(serviceFile.FileName);
-			serviceFile.PackageName = protoFile.Package;
-			serviceFile.CamelPackageName = TurboLinkUtils.GetCamelPackageName(serviceFile.PackageName);
-			serviceFile.GrpcPackageName = TurboLinkUtils.GetGrpcName(serviceFile.PackageName);
-			serviceFile.TurboLinkBasicFileName = "S" + serviceFile.CamelPackageName + "/" + serviceFile.CamelFileName;
-
-			//add to grpc service dictionary
-			GrpcServiceFiles[serviceFile.FileName] = serviceFile;
-		}
 		private void AddDependencyFiles(string protoFileName)
 		{
 			var serviceFile = GrpcServiceFiles[protoFileName];
 
 			serviceFile.DependencyFiles = new List<string>();
-			foreach (string dependency in serviceFile.ProtoFile.Dependency)
+			foreach (string dependency in serviceFile.ProtoFileDesc.Dependency)
 			{
 				//set dependency file as turbolink base name, eg. "SGoogleProtobuf/Struct"
 				serviceFile.DependencyFiles.Add(GrpcServiceFiles[dependency].TurboLinkBasicFileName);
@@ -200,7 +245,7 @@ namespace protoc_gen_turbolink
 			serviceFile.EnumArray = new List<GrpcEnum>();
 
 			//iterate enum in protofile
-			foreach (EnumDescriptorProto protoEnum in serviceFile.ProtoFile.EnumType)
+			foreach (EnumDescriptorProto protoEnum in serviceFile.ProtoFileDesc.EnumType)
 			{
 				AddEnum(ref serviceFile, 
 					string.Join(string.Empty,	"EGrpc", serviceFile.CamelPackageName, protoEnum.Name),
@@ -209,7 +254,7 @@ namespace protoc_gen_turbolink
 			}
 
 			//iterate nested enum in message
-			foreach (DescriptorProto message in serviceFile.ProtoFile.MessageType)
+			foreach (DescriptorProto message in serviceFile.ProtoFileDesc.MessageType)
 			{
 				foreach (EnumDescriptorProto protoEnum in message.EnumType)
 				{
@@ -243,7 +288,7 @@ namespace protoc_gen_turbolink
 			var serviceFile = GrpcServiceFiles[protoFileName];
 
 			serviceFile.MessageArray = new List<GrpcMessage>();
-			foreach (DescriptorProto protoMessage in serviceFile.ProtoFile.MessageType)
+			foreach (DescriptorProto protoMessage in serviceFile.ProtoFileDesc.MessageType)
 			{
 				//add nested message first
 				foreach (DescriptorProto nestedProtoMessage in protoMessage.NestedType)
@@ -297,25 +342,14 @@ namespace protoc_gen_turbolink
 			var serviceFile = GrpcServiceFiles[protoFileName];
 			serviceFile.ServiceArray = new List<GrpcService>();
 
-			foreach (ServiceDescriptorProto service in serviceFile.ProtoFile.Service)
+			foreach (ServiceDescriptorProto service in serviceFile.ProtoFileDesc.Service)
 			{
-				GrpcService newService = new GrpcService();
-				newService.Name = service.Name;
+				GrpcService newService = new GrpcService(service);
 				newService.MethodArray = new List<GrpcServiceMethod>();
 
 				foreach (MethodDescriptorProto method in service.Method)
 				{
-					GrpcServiceMethod newMethod = new GrpcServiceMethod();
-					newMethod.Name = method.Name;
-					newMethod.ClientStreaming = method.ClientStreaming;
-					newMethod.ServerStreaming = method.ServerStreaming;
-					newMethod.InputType = TurboLinkUtils.GetMessageName(method.InputType);
-					newMethod.GrpcInputType = method.InputType.Replace(".", "::");
-					newMethod.OutputType = TurboLinkUtils.GetMessageName(method.OutputType);
-					newMethod.GrpcOutputType = method.OutputType.Replace(".", "::");
-					newMethod.ContextSuperClass = TurboLinkUtils.GetContextSuperClass(service, newMethod);
-
-					newService.MethodArray.Add(newMethod);
+					newService.MethodArray.Add(new GrpcServiceMethod(method));
 				}
 				serviceFile.ServiceArray.Add(newService);
 			}
