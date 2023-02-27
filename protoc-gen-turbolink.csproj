@@ -233,6 +233,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Grpc.Core.2.46.5\build\net45\Grpc.Core.targets" Condition="Exists('packages\Grpc.Core.2.46.5\build\net45\Grpc.Core.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>$(USERPROFILE)\.nuget\packages\ilmerge\3.0.41\tools\net452\ILMerge.exe $(TargetPath) /out:$(ProjectDir)bin\protoc-gen-turbolink.exe $(TargetDir)Google.Protobuf.dll $(TargetDir)System.Memory.dll $(TargetDir)System.Runtime.CompilerServices.Unsafe.dll $(TargetDir)System.Text.Json.dll $(TargetDir)Microsoft.Bcl.AsyncInterfaces.dll $(TargetDir)System.Text.Encodings.Web.dll $(TargetDir)System.Threading.Tasks.Extensions.dll $(TargetDir)System.Buffers.dll</PostBuildEvent>
+    <PostBuildEvent>$(USERPROFILE)\.nuget\packages\ilmerge\3.0.41\tools\net452\ILMerge.exe $(TargetPath) /out:$(ProjectDir)bin\protoc-gen-turbolink.exe $(TargetDir)Google.Protobuf.dll $(TargetDir)System.Memory.dll $(TargetDir)System.Runtime.CompilerServices.Unsafe.dll $(TargetDir)System.Text.Json.dll $(TargetDir)Microsoft.Bcl.AsyncInterfaces.dll $(TargetDir)System.Text.Encodings.Web.dll $(TargetDir)System.Threading.Tasks.Extensions.dll $(TargetDir)System.Buffers.dll
+copy $(ProjectDir)bin\protoc-gen-turbolink.exe  D:\TurboLink.github\turbolink.test\Client\Plugins\TurboLink\Tools</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -149,6 +149,8 @@ namespace protoc_gen_turbolink
 	public class GrpcServiceFile
 	{
 		public readonly FileDescriptorProto ProtoFileDesc;
+		//split package name as string array
+		public readonly string[] PackageNameAsList;
 		public string FileName								//eg. "hello.proto", "google/protobuf/struct.proto"
 		{
 			get => ProtoFileDesc.Name;
@@ -163,11 +165,11 @@ namespace protoc_gen_turbolink
 		}
 		public string CamelPackageName                      //eg. "Greeter", "GoogleProtobuf"
 		{
-			get => TurboLinkUtils.GetCamelPackageName(PackageName);
+			get => string.Join(string.Empty, TurboLinkUtils.MakeCamelStringArray(PackageNameAsList));
 		}
 		public string GrpcPackageName                       //eg. "Greeter", "google::protobuf"
 		{
-			get => PackageName.Replace(".", "::");
+			get => string.Join("::", PackageNameAsList);
 		}
 		public string TurboLinkBasicFileName                //eg. "SGreeter/Hello", "SGoogleProtobuf/Struct"
 		{
@@ -180,6 +182,7 @@ namespace protoc_gen_turbolink
 		public GrpcServiceFile(FileDescriptorProto protoFileDesc)
 		{
 			ProtoFileDesc = protoFileDesc;
+			PackageNameAsList = PackageName.Split('.').ToArray();
 		}
 	}
 	public class TurboLinkCollection
@@ -286,35 +289,45 @@ namespace protoc_gen_turbolink
 		private void AddMessages(string protoFileName)
 		{
 			var serviceFile = GrpcServiceFiles[protoFileName];
-
 			serviceFile.MessageArray = new List<GrpcMessage>();
+
+			string[] parentNameList = new string[] { };
 			foreach (DescriptorProto protoMessage in serviceFile.ProtoFileDesc.MessageType)
 			{
-				//add nested message first
-				foreach (DescriptorProto nestedProtoMessage in protoMessage.NestedType)
-				{
-					if (nestedProtoMessage.Options != null && nestedProtoMessage.Options.MapEntry) continue;
-					AddMessage(ref serviceFile,
-						string.Join(string.Empty, "FGrpc", serviceFile.CamelPackageName, protoMessage.Name, nestedProtoMessage.Name),
-						string.Join(".", serviceFile.CamelPackageName, protoMessage.Name, nestedProtoMessage.Name),
-						string.Join("::", serviceFile.GrpcPackageName, protoMessage.Name, nestedProtoMessage.Name),
-						nestedProtoMessage);
-				}
-
-				AddMessage(ref serviceFile,
-					string.Join(string.Empty, "FGrpc", serviceFile.CamelPackageName, protoMessage.Name),
-					string.Join(".", serviceFile.CamelPackageName, protoMessage.Name),
-					string.Join("::", serviceFile.GrpcPackageName, protoMessage.Name),
-					protoMessage); ;
+				AddMessage(ref serviceFile, parentNameList, protoMessage);
 			}
 			GrpcServiceFiles[protoFileName] = serviceFile;
 		}
-		private void AddMessage(ref GrpcServiceFile serviceFile, string name, string displayName, string grpcName, DescriptorProto protoMessage)
+		private void AddMessage(ref GrpcServiceFile serviceFile, string[] parentMessageNameList, DescriptorProto protoMessage)
 		{
+			//add nested message first
+			if (protoMessage.NestedType.Count > 0)
+			{
+				string[] currentMessageNameList = new string[parentMessageNameList.Length + 1];
+				parentMessageNameList.CopyTo(currentMessageNameList, 0);
+				currentMessageNameList[parentMessageNameList.Length] = protoMessage.Name;
+				
+				foreach (DescriptorProto nestedProtoMessage in protoMessage.NestedType)
+				{
+					if (nestedProtoMessage.Options != null && nestedProtoMessage.Options.MapEntry) continue;
+					AddMessage(ref serviceFile, currentMessageNameList, nestedProtoMessage);
+				}
+			}
+
 			GrpcMessage message = new GrpcMessage();
-			message.Name = name;
-			message.DisplayName = displayName;
-			message.GrpcName = grpcName;
+			message.Name = "FGrpc" +
+				serviceFile.CamelPackageName +
+				string.Join(string.Empty, TurboLinkUtils.MakeCamelStringArray(parentMessageNameList)) +
+				TurboLinkUtils.MakeCamelString(protoMessage.Name);
+			
+			message.DisplayName = serviceFile.CamelPackageName + "." +
+				TurboLinkUtils.JoinCamelString(parentMessageNameList, ".") + 
+				TurboLinkUtils.MakeCamelString(protoMessage.Name);
+
+			message.GrpcName = serviceFile.GrpcPackageName +  "::" +
+				TurboLinkUtils.JoinCamelString(parentMessageNameList, "::") +
+				protoMessage.Name;
+			
 			message.Fields = new List<GrpcMessageField>();
 
 			foreach (FieldDescriptorProto field in protoMessage.Field)
@@ -322,11 +335,11 @@ namespace protoc_gen_turbolink
 				bool isMapField;
 				FieldDescriptorProto keyField, valueField;
 				(isMapField, keyField, valueField) = TurboLinkUtils.IsMapField(field, protoMessage);
-				if(isMapField)
+				if (isMapField)
 				{
 					message.Fields.Add(new GrpcMessageField_Map(field, keyField, valueField));
 				}
-				else if(field.Label == FieldDescriptorProto.Types.Label.Repeated)
+				else if (field.Label == FieldDescriptorProto.Types.Label.Repeated)
 				{
 					message.Fields.Add(new GrpcMessageField_Repeated(field));
 				}
@@ -336,6 +349,7 @@ namespace protoc_gen_turbolink
 				}
 			}
 			serviceFile.MessageArray.Add(message);
+
 		}
 		private void AddServices(string protoFileName)
 		{

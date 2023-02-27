@@ -9,17 +9,20 @@ namespace protoc_gen_turbolink
 {
 	class TurboLinkUtils
 	{
-        //eg. "common" -> "Common",
-        //eg. "google.protobuf" -> "GoogleProtobuf"
-        public static string GetCamelPackageName(string input)
+        public static string MakeCamelString(string inputString)
         {
-            string[] words = input.Split('.').ToArray();
-            string result = "";
-            foreach (string word in words)
-            {
-                result += char.ToUpper(word[0]) + word.Substring(1);
-            }
-            return result;
+            if (inputString.Length == 0) return string.Empty;
+            return char.ToUpper(inputString[0]) + inputString.Substring(1);
+        }
+        public static string[] MakeCamelStringArray(string[] inputStringArray)
+		{
+            if (inputStringArray.Length == 0) return inputStringArray;
+            return inputStringArray.Select(world => char.ToUpper(world[0]) + world.Substring(1)).ToArray();
+		}
+        public static string JoinCamelString(string[] inputStringArray, string connection)
+		{
+            if (inputStringArray.Length == 0) return string.Empty;
+            return string.Join(connection, MakeCamelStringArray(inputStringArray)) + connection;
         }
         //eg. "common.proto" -> "Common"
         //eg. "google/protobuf/field_mask.proto" -> "FieldMask"
@@ -28,10 +31,7 @@ namespace protoc_gen_turbolink
             string fileName = input.Split('/').ToArray().Last();
             fileName = fileName.Split('.').ToArray().First();   // remove extension
             var words = fileName.Split(new[] { "_", " " }, StringSplitOptions.RemoveEmptyEntries);
-            words = words
-                .Select(word => char.ToUpper(word[0]) + word.Substring(1))
-                .ToArray();
-            return string.Join(string.Empty, words);
+            return string.Join(string.Empty, MakeCamelStringArray(words));
         }
         public static string GetMessageName(string grpcName, string prefix="FGrpc")
         {
