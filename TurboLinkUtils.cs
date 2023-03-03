@@ -11,23 +11,34 @@ namespace protoc_gen_turbolink
 	{
         public static string MakeCamelString(string inputString)
         {
+            //eg. "name" -> "Name"
             if (inputString.Length == 0) return string.Empty;
             return char.ToUpper(inputString[0]) + inputString.Substring(1);
         }
         public static string[] MakeCamelStringArray(string[] inputStringArray)
 		{
+            //eg. ["my", "name"] => "MyName"
             if (inputStringArray.Length == 0) return inputStringArray;
-            return inputStringArray.Select(world => char.ToUpper(world[0]) + world.Substring(1)).ToArray();
+            return inputStringArray
+                .Where(world => world.Length>0)
+                .Select(world => char.ToUpper(world[0]) + world.Substring(1)).ToArray();
 		}
+        public static string JoinString(string[] inputStringArray, string connection)
+        {
+            //eg. ["my", "name"] => "my.name."
+            if (inputStringArray.Length == 0) return string.Empty;
+            return string.Join(connection, inputStringArray) + connection;
+        }
         public static string JoinCamelString(string[] inputStringArray, string connection)
 		{
+            //eg. ["my", "name"] =>"My.Name."
             if (inputStringArray.Length == 0) return string.Empty;
             return string.Join(connection, MakeCamelStringArray(inputStringArray)) + connection;
         }
-        //eg. "common.proto" -> "Common"
-        //eg. "google/protobuf/field_mask.proto" -> "FieldMask"
         public static string GetCamelFileName(string input)
         {
+            //eg. "common.proto" -> "Common"
+            //eg. "google/protobuf/field_mask.proto" -> "FieldMask"
             string fileName = input.Split('/').ToArray().Last();
             fileName = fileName.Split('.').ToArray().First();   // remove extension
             var words = fileName.Split(new[] { "_", " " }, StringSplitOptions.RemoveEmptyEntries);
@@ -37,14 +48,8 @@ namespace protoc_gen_turbolink
         {
             //eg.  ".Time.NowResponse"  -> "FGrpcTimeNowResponse"
             //eg.  "authzed.api.v1.CheckRequest" => "FGrpcAuthzedApiV1CheckRequest"
-            string[] words = grpcName.Split('.').ToArray();
-            string result = prefix;// "FGrpc";
-            foreach (string word in words)
-            {
-                if (word.Length > 0)
-                    result += char.ToUpper(word[0]) + word.Substring(1);
-            }
-            return result;
+            string[] words = grpcName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
+            return prefix + JoinCamelString(words, string.Empty);
         }
         public static string GetFieldType(FieldDescriptorProto field)
         {

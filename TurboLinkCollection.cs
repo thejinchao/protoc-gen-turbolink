@@ -26,10 +26,14 @@ namespace protoc_gen_turbolink
 	abstract public class GrpcMessageField
 	{
 		public FieldDescriptorProto FieldDesc;
-		public GrpcMessageField(FieldDescriptorProto fieldDesc) => FieldDesc = fieldDesc;
-		public virtual string FieldType							//eg. "int32", "FString", "EGrpcCommonGender", "TArray<FGrpcUserRegisterRequestAddress>"
+		public GrpcMessageField(FieldDescriptorProto fieldDesc)
 		{
-			get => TurboLinkUtils.GetFieldType(FieldDesc);
+			FieldDesc = fieldDesc;
+			NeedNativeMake = false;
+		}
+		public abstract string FieldType						//eg. "int32", "FString", "EGrpcCommonGender", "TArray<FGrpcUserRegisterRequestAddress>"
+		{
+			get;
 		}
 		public string FieldGrpcType								//eg. "::Common::Gender", "::google::protobuf::Value"
 		{
@@ -43,20 +47,32 @@ namespace protoc_gen_turbolink
 		{
 			get => FieldDesc.Name.ToLower();
 		}
+		public abstract string TypeAsNativeField                //eg. "TSharedPtr<FGrpcUserRegisterRequestAddress>", "TArray<TSharedPtr<FGrpcUserRegisterRequestAddress>>"
+		{
+			get;
+		}
 		public virtual string FieldDefaultValue
 		{
 			get => string.Empty;
 		}
+		public bool NeedNativeMake { get; set; }
 	}
 	public class GrpcMessageField_Single : GrpcMessageField
 	{
 		public GrpcMessageField_Single(FieldDescriptorProto fieldDesc) : base(fieldDesc)
 		{ }
+		public override string FieldType
+		{
+			get => TurboLinkUtils.GetFieldType(FieldDesc);
+		}
+		public override string TypeAsNativeField
+		{
+			get => NeedNativeMake ? ("TSharedPtr<" + TurboLinkUtils.GetFieldType(FieldDesc) + ">") : FieldType;
+		}
 		public override string FieldDefaultValue				//eg. "=0", '=""', "= static_cast<EGrpcCommonGender>(0)", ""
 		{
 			get => TurboLinkUtils.GetFieldDefaultValue(FieldDesc);
 		}
-
 	}
 	public class GrpcMessageField_Repeated : GrpcMessageField
 	{
@@ -68,6 +84,10 @@ namespace protoc_gen_turbolink
 		public override string FieldType
 		{
 			get => "TArray<" + ItemField.FieldType + ">";
+		}
+		public override string TypeAsNativeField
+		{
+			get => NeedNativeMake ? ("TArray<TSharedPtr<" + ItemField.FieldType + ">>") : FieldType;
 		}
 	}
 	public class GrpcMessageField_Map : GrpcMessageField
@@ -83,14 +103,47 @@ namespace protoc_gen_turbolink
 		{
 			get => "TMap<" + KeyField.FieldType + ", " + ValueField.FieldType + ">";
 		}
+		public override string TypeAsNativeField
+		{
+			get => NeedNativeMake ? ("TMap<" + KeyField.FieldType + ", TSharedPtr<" + ValueField.FieldType + ">>") : FieldType;
+		}
 	}
 
-	public struct GrpcMessage
+	public class GrpcMessage
 	{
-		public string Name { get; set; }                        //eg. "FGrpcGreeterHelloResponse",  "FGrpcGoogleProtobufValue"
-		public string GrpcName { get; set; }					//eg. "Greeter::HelloResponse", "Google::Protobuf::Value"
-		public string DisplayName { get; set; }					//eg. "Greeter.HelloResponse", "GoogleProtobuf.Value"
+		public readonly DescriptorProto MessageDesc;
+		public readonly GrpcServiceFile ServiceFile;
+		public int Index { get; set; }
+		public string Name                                      //eg. "FGrpcGreeterHelloResponse",  "FGrpcGoogleProtobufValue"
+		{
+			get => "FGrpc" +
+				ServiceFile.CamelPackageName +
+				TurboLinkUtils.JoinCamelString(ParentMessageNameList, string.Empty) +
+				TurboLinkUtils.MakeCamelString(MessageDesc.Name);
+		}
+		public string GrpcName                                  //eg. "Greeter::HelloResponse", "google::protobuf::Value"
+		{
+			get => ServiceFile.GrpcPackageName + "::" +
+				TurboLinkUtils.JoinString(ParentMessageNameList, "::") +
+				MessageDesc.Name;
+		}
+		public string DisplayName                               //eg. "Greeter.HelloResponse", "GoogleProtobuf.Value"
+		{
+			get => ServiceFile.CamelPackageName + "." +
+				TurboLinkUtils.JoinCamelString(ParentMessageNameList, ".") +
+				TurboLinkUtils.MakeCamelString(MessageDesc.Name);
+		}
+		public string[] ParentMessageNameList;
 		public List<GrpcMessageField> Fields { get; set; }
+		public bool HasNativeMake { get; set; }
+		public GrpcMessage(DescriptorProto messageDesc, GrpcServiceFile serviceFile)
+		{
+			MessageDesc = messageDesc;
+			ServiceFile = serviceFile;
+			Index = serviceFile.MessageArray.Count;
+			Fields = new List<GrpcMessageField>();
+			HasNativeMake = false;
+		}
 	}
 	public class GrpcServiceMethod
 	{
@@ -175,14 +228,16 @@ namespace protoc_gen_turbolink
 		{
 			get => "S" + CamelPackageName + "/" + CamelFileName;
 		}
-		public List<string> DependencyFiles { get; set; }	
+		public List<string> DependencyFiles { get; set; }
 		public List<GrpcEnum> EnumArray { get; set; }
 		public List<GrpcMessage> MessageArray { get; set; }
 		public List<GrpcService> ServiceArray { get; set; }
+		public Dictionary<string, int> Message2IndexMap { get; set; }
 		public GrpcServiceFile(FileDescriptorProto protoFileDesc)
 		{
 			ProtoFileDesc = protoFileDesc;
 			PackageNameAsList = PackageName.Split('.').ToArray();
+			Message2IndexMap = new Dictionary<string, int>();
 		}
 	}
 	public class TurboLinkCollection
@@ -226,6 +281,11 @@ namespace protoc_gen_turbolink
 			foreach (string protoFileName in GrpcServiceFiles.Keys.ToList())
 			{
 				AddServices(protoFileName);
+			}
+			//step 6: scan message field to analyze the interdependencies between messages
+			foreach (string protoFileName in GrpcServiceFiles.Keys.ToList())
+			{
+				AnalyzeMessage(protoFileName);
 			}
 
 			return true;
@@ -314,21 +374,13 @@ namespace protoc_gen_turbolink
 				}
 			}
 
-			GrpcMessage message = new GrpcMessage();
-			message.Name = "FGrpc" +
-				serviceFile.CamelPackageName +
-				string.Join(string.Empty, TurboLinkUtils.MakeCamelStringArray(parentMessageNameList)) +
-				TurboLinkUtils.MakeCamelString(protoMessage.Name);
-			
-			message.DisplayName = serviceFile.CamelPackageName + "." +
-				TurboLinkUtils.JoinCamelString(parentMessageNameList, ".") + 
-				TurboLinkUtils.MakeCamelString(protoMessage.Name);
-
-			message.GrpcName = serviceFile.GrpcPackageName +  "::" +
-				TurboLinkUtils.JoinCamelString(parentMessageNameList, "::") +
-				protoMessage.Name;
-			
-			message.Fields = new List<GrpcMessageField>();
+			GrpcMessage message = new GrpcMessage(protoMessage, serviceFile);
+			message.ParentMessageNameList = parentMessageNameList;
+			serviceFile.Message2IndexMap.Add(
+				"." + serviceFile.PackageName + "." +
+				TurboLinkUtils.JoinString(parentMessageNameList, ".") +
+				protoMessage.Name, 
+				message.Index);
 
 			foreach (FieldDescriptorProto field in protoMessage.Field)
 			{
@@ -369,6 +421,36 @@ namespace protoc_gen_turbolink
 			}
 			GrpcServiceFiles[protoFileName] = serviceFile;
 		}
+		private void AnalyzeMessage(string protoFileName)
+		{
+			var serviceFile = GrpcServiceFiles[protoFileName];
+
+			//find message index that each field directly depends on
+			foreach(GrpcMessage message in serviceFile.MessageArray)
+			{
+				foreach(GrpcMessageField messageField in message.Fields)
+				{
+					if (messageField.FieldDesc.Type != FieldDescriptorProto.Types.Type.Message) continue;
+					string typeName = messageField.FieldDesc.TypeName;
+
+					if (messageField is GrpcMessageField_Map)
+					{
+						//for map field, pick value field name, eg. "map<string, Address>" => "Address"
+						GrpcMessageField_Map mapMessageField = (GrpcMessageField_Map)messageField;
+						typeName = mapMessageField.ValueField.FieldDesc.TypeName;
+					}
+					if (serviceFile.Message2IndexMap.ContainsKey(typeName))
+					{
+						if(serviceFile.Message2IndexMap[typeName] >= message.Index)
+						{
+							messageField.NeedNativeMake = true;
+							message.HasNativeMake = true;
+						}
+					}
+				}
+			}
+		}
+
 		public string DumpToString()
 		{
 			var options = new JsonSerializerOptions { WriteIndented = true };
