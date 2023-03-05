@@ -25,7 +25,7 @@ namespace protoc_gen_turbolink
 
 	abstract public class GrpcMessageField
 	{
-		public FieldDescriptorProto FieldDesc;
+		public readonly FieldDescriptorProto FieldDesc;
 		public GrpcMessageField(FieldDescriptorProto fieldDesc)
 		{
 			FieldDesc = fieldDesc;
@@ -76,7 +76,7 @@ namespace protoc_gen_turbolink
 	}
 	public class GrpcMessageField_Repeated : GrpcMessageField
 	{
-		public GrpcMessageField ItemField;
+		public readonly GrpcMessageField ItemField;
 		public GrpcMessageField_Repeated(FieldDescriptorProto fieldDesc) : base(fieldDesc)
 		{
 			ItemField = new GrpcMessageField_Single(fieldDesc);
@@ -92,8 +92,8 @@ namespace protoc_gen_turbolink
 	}
 	public class GrpcMessageField_Map : GrpcMessageField
 	{
-		public GrpcMessageField KeyField;
-		public GrpcMessageField ValueField;
+		public readonly GrpcMessageField KeyField;
+		public readonly GrpcMessageField ValueField;
 		public GrpcMessageField_Map(FieldDescriptorProto fieldDesc, FieldDescriptorProto keyField, FieldDescriptorProto valueField) : base(fieldDesc)
 		{
 			KeyField = new GrpcMessageField_Single(keyField);
@@ -113,6 +113,14 @@ namespace protoc_gen_turbolink
 	{
 		public readonly DescriptorProto MessageDesc;
 		public readonly GrpcServiceFile ServiceFile;
+		public GrpcMessage(DescriptorProto messageDesc, GrpcServiceFile serviceFile)
+		{
+			MessageDesc = messageDesc;
+			ServiceFile = serviceFile;
+			Index = serviceFile.MessageArray.Count;
+			Fields = new List<GrpcMessageField>();
+			HasNativeMake = false;
+		}
 		public int Index { get; set; }
 		public string Name                                      //eg. "FGrpcGreeterHelloResponse",  "FGrpcGoogleProtobufValue"
 		{
@@ -140,18 +148,15 @@ namespace protoc_gen_turbolink
 		public string[] ParentMessageNameList;
 		public List<GrpcMessageField> Fields { get; set; }
 		public bool HasNativeMake { get; set; }
-		public GrpcMessage(DescriptorProto messageDesc, GrpcServiceFile serviceFile)
-		{
-			MessageDesc = messageDesc;
-			ServiceFile = serviceFile;
-			Index = serviceFile.MessageArray.Count;
-			Fields = new List<GrpcMessageField>();
-			HasNativeMake = false;
-		}
+
 	}
 	public class GrpcServiceMethod
 	{
-		public MethodDescriptorProto MethodDesc;
+		public readonly MethodDescriptorProto MethodDesc;
+		public GrpcServiceMethod(MethodDescriptorProto methodDesc)
+		{
+			MethodDesc = methodDesc;
+		}
 		public string Name
 		{
 			get => MethodDesc.Name;
@@ -183,10 +188,6 @@ namespace protoc_gen_turbolink
 		public string ContextSuperClass                     //eg. "GrpcContext_Ping_Pong", "GrpcContext_Ping_Stream"
 		{
 			get => TurboLinkUtils.GetContextSuperClass(MethodDesc);
-		}
-		public GrpcServiceMethod(MethodDescriptorProto methodDesc)
-		{
-			MethodDesc = methodDesc;
 		}
 	}
 	public class GrpcService
