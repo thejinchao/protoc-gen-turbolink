@@ -11,12 +11,12 @@ using Google.Protobuf.Collections;
 
 namespace protoc_gen_turbolink
 {
-	public struct GrpcEnumField
+	public class GrpcEnumField
 	{
 		public string Name { get; set; }				//eg. "Male", "Female"
 		public int Number { get; set; }					//eg. "0", "1"
 	}
-	public struct GrpcEnum
+	public class GrpcEnum
 	{
 		public string Name { get; set; }                //eg. "EGrpcCommonGender"
 		public string DisplayName { get; set; }         //eg. "Common.Gender"
@@ -311,37 +311,54 @@ namespace protoc_gen_turbolink
 			var serviceFile = GrpcServiceFiles[protoFileName];
 			serviceFile.EnumArray = new List<GrpcEnum>();
 
+			string[] parentNameList = new string[] { };
+
 			//iterate enum in protofile
-			foreach (EnumDescriptorProto protoEnum in serviceFile.ProtoFileDesc.EnumType)
+			foreach (EnumDescriptorProto enumDesc in serviceFile.ProtoFileDesc.EnumType)
 			{
-				AddEnum(ref serviceFile, 
-					string.Join(string.Empty,	"EGrpc", serviceFile.CamelPackageName, protoEnum.Name),
-					string.Join(".",			serviceFile.CamelPackageName, protoEnum.Name),
-					protoEnum.Value);
+				AddEnum(ref serviceFile, parentNameList, enumDesc);
 			}
 
 			//iterate nested enum in message
 			foreach (DescriptorProto message in serviceFile.ProtoFileDesc.MessageType)
 			{
-				foreach (EnumDescriptorProto protoEnum in message.EnumType)
-				{
-					AddEnum(ref serviceFile,
-						string.Join(string.Empty,	"EGrpc", serviceFile.CamelPackageName, message.Name, protoEnum.Name),
-						string.Join(".",			serviceFile.CamelPackageName, message.Name, protoEnum.Name),
-						protoEnum.Value);
-				}
+				AddNestedEnums(ref serviceFile, parentNameList, message);
 			}
 
 			GrpcServiceFiles[protoFileName] = serviceFile;
 		}
-		private void AddEnum(ref GrpcServiceFile serviceFile, string name, string displayName, RepeatedField<EnumValueDescriptorProto> enumFields)
+		private void AddNestedEnums(ref GrpcServiceFile serviceFile, string[] parentNameList, DescriptorProto message)
+		{
+			string[] currentNameList = new string[parentNameList.Length + 1];
+			parentNameList.CopyTo(currentNameList, 0);
+			currentNameList[parentNameList.Length] = message.Name;
+
+			foreach (EnumDescriptorProto enumDesc in message.EnumType)
+			{
+				AddEnum(ref serviceFile, currentNameList, enumDesc);
+			}
+
+			if (message.NestedType.Count > 0)
+			{
+				foreach (DescriptorProto nestedProtoMessage in message.NestedType)
+				{
+					if (nestedProtoMessage.Options != null && nestedProtoMessage.Options.MapEntry) continue;
+					AddNestedEnums(ref serviceFile, currentNameList, nestedProtoMessage);
+				}
+			}
+		}
+		private void AddEnum(ref GrpcServiceFile serviceFile, string[] parentNameList, EnumDescriptorProto enumDesc)
 		{
 			GrpcEnum newEnum = new GrpcEnum();
-			newEnum.Name = name;
-			newEnum.DisplayName = displayName;
-			newEnum.Fields = new List<GrpcEnumField>();
+			newEnum.Name = string.Join(string.Empty,
+				"EGrpc", serviceFile.CamelPackageName, TurboLinkUtils.JoinString(parentNameList, string.Empty), enumDesc.Name);
 
-			foreach (EnumValueDescriptorProto enumValue in enumFields)
+			newEnum.DisplayName = serviceFile.CamelPackageName + "." + 
+				TurboLinkUtils.JoinString(parentNameList, ".") + 
+				enumDesc.Name;
+
+			newEnum.Fields = new List<GrpcEnumField>();
+			foreach (EnumValueDescriptorProto enumValue in enumDesc.Value)
 			{
 				GrpcEnumField newEnumField = new GrpcEnumField();
 				newEnumField.Name = enumValue.Name;
