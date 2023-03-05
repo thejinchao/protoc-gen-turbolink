@@ -119,7 +119,11 @@ namespace protoc_gen_turbolink
 			get => "FGrpc" +
 				ServiceFile.CamelPackageName +
 				TurboLinkUtils.JoinCamelString(ParentMessageNameList, string.Empty) +
-				TurboLinkUtils.MakeCamelString(MessageDesc.Name);
+				CamelName;
+		}
+		public string CamelName									//eg. "HelloResponse", "Value"
+		{
+			get => TurboLinkUtils.MakeCamelString(MessageDesc.Name);
 		}
 		public string GrpcName                                  //eg. "Greeter::HelloResponse", "google::protobuf::Value"
 		{
@@ -131,7 +135,7 @@ namespace protoc_gen_turbolink
 		{
 			get => ServiceFile.CamelPackageName + "." +
 				TurboLinkUtils.JoinCamelString(ParentMessageNameList, ".") +
-				TurboLinkUtils.MakeCamelString(MessageDesc.Name);
+				CamelName;
 		}
 		public string[] ParentMessageNameList;
 		public List<GrpcMessageField> Fields { get; set; }

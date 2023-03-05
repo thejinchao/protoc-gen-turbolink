@@ -11,9 +11,8 @@ foreach(GrpcMessage message in s.MessageArray)
 {
 if(message.HasNativeMake)
 {
-string camelMessageName = char.ToUpper(message.MessageDesc.Name[0]) + message.MessageDesc.Name.Substring(1);
 #>
-<#=message.Name#> U<#=message.Name.Substring(1)#>HelperLibrary::Make<#=camelMessageName#>(
+<#=message.Name#> U<#=message.Name.Substring(1)#>HelperLibrary::Make<#=message.CamelName#>(
     <#
 for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
@@ -23,7 +22,7 @@ if(index==(message.Fields.Count-1)){#>
     <#}else{#>, <#}}#>
 )
 {
-    <#=message.Name#> <#=camelMessageName#>;
+    <#=message.Name#> <#=message.CamelName#>;
 <#for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
 #>
@@ -34,7 +33,7 @@ GrpcMessageField_Map mapField = (GrpcMessageField_Map)field;
 #>
     for (const auto& element : <#=field.FieldName#>)
     {
-        <#=camelMessageName#>.<#=field.FieldName#>.Add(element.Key, MakeShareable(new <#=mapField.ValueField.FieldType#>(element.Value)));
+        <#=message.CamelName#>.<#=field.FieldName#>.Add(element.Key, MakeShareable(new <#=mapField.ValueField.FieldType#>(element.Value)));
     }
 <#
 }else if(field is GrpcMessageField_Repeated) {
@@ -42,19 +41,19 @@ GrpcMessageField_Repeated repeatedField = (GrpcMessageField_Repeated)field;
 #>
     for (const auto& element : <#=field.FieldName#>)
     {
-        <#=camelMessageName#>.<#=field.FieldName#>.Add(MakeShareable(new <#=repeatedField.ItemField.FieldType#>(element)));
+        <#=message.CamelName#>.<#=field.FieldName#>.Add(MakeShareable(new <#=repeatedField.ItemField.FieldType#>(element)));
     }
 <#}else{#>
-    <#=camelMessageName#>.<#=field.FieldName#> = MakeShareable(new <#=field.FieldType#>(<#=field.FieldName#>));
+    <#=message.CamelName#>.<#=field.FieldName#> = MakeShareable(new <#=field.FieldType#>(<#=field.FieldName#>));
 <#}#>
 <#}else{#>
-    <#=camelMessageName#>.<#=field.FieldName#> = <#=field.FieldName#>;
+    <#=message.CamelName#>.<#=field.FieldName#> = <#=field.FieldName#>;
 <#}}#>
 
-    return <#=camelMessageName#>;
+    return <#=message.CamelName#>;
 }
 
-void U<#=message.Name.Substring(1)#>HelperLibrary::Break<#=camelMessageName#>(const <#=message.Name#>& <#=camelMessageName#>, 
+void U<#=message.Name.Substring(1)#>HelperLibrary::Break<#=message.CamelName#>(const <#=message.Name#>& <#=message.CamelName#>, 
     <#
 for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
@@ -72,7 +71,7 @@ GrpcMessageField field = message.Fields[index];
 if(field is GrpcMessageField_Map){
 GrpcMessageField_Map mapField = (GrpcMessageField_Map)field;
 #>
-    for (auto& element : <#=camelMessageName#>.<#=field.FieldName#>)
+    for (auto& element : <#=message.CamelName#>.<#=field.FieldName#>)
     {
         <#=field.FieldName#>.Add(element.Key, *(element.Value.Get()));
     }
@@ -80,15 +79,15 @@ GrpcMessageField_Map mapField = (GrpcMessageField_Map)field;
 }else if(field is GrpcMessageField_Repeated) {
 GrpcMessageField_Repeated repeatedField = (GrpcMessageField_Repeated)field;
 #>
-    for (auto& element : <#=camelMessageName#>.<#=field.FieldName#>)
+    for (auto& element : <#=message.CamelName#>.<#=field.FieldName#>)
     {
         <#=field.FieldName#>.Add(*(element.Get()));
     }
 <#}else{#>
-    <#=field.FieldName#> = *(<#=camelMessageName#>.<#=field.FieldName#>.Get());
+    <#=field.FieldName#> = *(<#=message.CamelName#>.<#=field.FieldName#>.Get());
 <#}#>
 <#}else{#>
-    <#=field.FieldName#> = <#=camelMessageName#>.<#=field.FieldName#>;
+    <#=field.FieldName#> = <#=message.CamelName#>.<#=field.FieldName#>;
 <#}}#>
 }
 

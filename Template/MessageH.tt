@@ -36,12 +36,11 @@ foreach(GrpcMessage message in s.MessageArray)
 {
 if(message.HasNativeMake)
 {
-string camelMessageName = char.ToUpper(message.MessageDesc.Name[0]) + message.MessageDesc.Name.Substring(1);
 #>
 
 USTRUCT(BlueprintType, meta = (DisplayName="<#=message.DisplayName#>",
-    HasNativeMake = "TurboLinkGrpc.<#=message.Name.Substring(1)#>HelperLibrary.Make<#=camelMessageName#>",
-    HasNativeBreak = "TurboLinkGrpc.<#=message.Name.Substring(1)#>HelperLibrary.Break<#=camelMessageName#>"))
+    HasNativeMake = "TurboLinkGrpc.<#=message.Name.Substring(1)#>HelperLibrary.Make<#=message.CamelName#>",
+    HasNativeBreak = "TurboLinkGrpc.<#=message.Name.Substring(1)#>HelperLibrary.Break<#=message.CamelName#>"))
 <#} else {#>
 
 USTRUCT(BlueprintType, meta = (DisplayName="<#=message.DisplayName#>"))
@@ -69,7 +68,6 @@ foreach(GrpcMessage message in s.MessageArray)
 {
 if(message.HasNativeMake)
 {
-string camelMessageName = char.ToUpper(message.MessageDesc.Name[0]) + message.MessageDesc.Name.Substring(1);
 #>
 
 UCLASS()
@@ -78,7 +76,7 @@ class U<#=message.Name.Substring(1)#>HelperLibrary : public UBlueprintFunctionLi
     GENERATED_BODY()
 public:
     UFUNCTION(BlueprintPure, Category = "TurboLink|<#=s.CamelPackageName#>", meta=(BlueprintThreadSafe))
-    static <#=message.Name#> Make<#=camelMessageName#>(
+    static <#=message.Name#> Make<#=message.CamelName#>(
         <#
 for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
@@ -89,7 +87,7 @@ if(index==(message.Fields.Count-1)){#>
 );
 
     UFUNCTION(BlueprintPure, Category = "TurboLink|<#=s.CamelPackageName#>", meta=(BlueprintThreadSafe))
-    static void Break<#=camelMessageName#>(const <#=message.Name#>& <#=camelMessageName#>, 
+    static void Break<#=message.CamelName#>(const <#=message.Name#>& <#=message.CamelName#>, 
         <#
 for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
