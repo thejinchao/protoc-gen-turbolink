@@ -11,6 +11,7 @@
 
 <# 
 foreach(GrpcMessage message in s.MessageArray) {
+	if(message is GrpcMessage_Oneof) continue;
 #>
 void GRPC_TO_TURBOLINK(const ::<#=message.GrpcName#>* in, <#=message.Name#>* out);
 void TURBOLINK_TO_GRPC(const <#=message.Name#>* in, ::<#=message.GrpcName#>* out);

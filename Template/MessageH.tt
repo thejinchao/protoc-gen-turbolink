@@ -34,7 +34,7 @@ foreach (GrpcEnumField enumField in enumDefine.Fields)
 <# 
 foreach(GrpcMessage message in s.MessageArray)
 {
-if(message.HasNativeMake)
+if(message.HasNativeMake || message is GrpcMessage_Oneof)
 {
 #>
 
@@ -48,6 +48,14 @@ USTRUCT(BlueprintType, meta = (DisplayName="<#=message.DisplayName#>"))
 struct <#=message.Name#> : public FGrpcMessage
 {
     GENERATED_BODY()
+<#
+if(message is GrpcMessage_Oneof) {
+GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message;
+#>
+
+    UPROPERTY(BlueprintReadWrite)
+    <#=oneofMessage.OneofEnum.Name#> <#=oneofMessage.CamelName#>Case;
+<#}#>
 <#
 foreach(GrpcMessageField field in message.Fields)
 {
@@ -66,7 +74,7 @@ if(field.NeedNativeMake)
 <# 
 foreach(GrpcMessage message in s.MessageArray)
 {
-if(message.HasNativeMake)
+if(message.HasNativeMake || message is GrpcMessage_Oneof)
 {
 #>
 
@@ -76,8 +84,9 @@ class U<#=message.Name.Substring(1)#>HelperLibrary : public UBlueprintFunctionLi
     GENERATED_BODY()
 public:
     UFUNCTION(BlueprintPure, Category = "TurboLink|<#=s.CamelPackageName#>", meta=(BlueprintThreadSafe))
-    static <#=message.Name#> Make<#=message.CamelName#>(
-        <#
+    static <#=message.Name#> Make<#=message.CamelName#>(<#if(message is GrpcMessage_Oneof){ GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message; #><#=oneofMessage.OneofEnum.Name#> <#=oneofMessage.CamelName#>Case, 
+<#}else{#> 
+<#}#>        <#
 for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
 #><#=field.FieldType#> <#=field.FieldName#><#
@@ -87,8 +96,9 @@ if(index==(message.Fields.Count-1)){#>
 );
 
     UFUNCTION(BlueprintPure, Category = "TurboLink|<#=s.CamelPackageName#>", meta=(BlueprintThreadSafe))
-    static void Break<#=message.CamelName#>(const <#=message.Name#>& <#=message.CamelName#>, 
-        <#
+    static void Break<#=message.CamelName#>(const <#=message.Name#>& <#=message.CamelName#>, <#if(message is GrpcMessage_Oneof){ GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message; #><#=oneofMessage.OneofEnum.Name#>& <#=oneofMessage.CamelName#>Case, 
+<#}else{#> 
+<#}#>        <#
 for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
 #><#=field.FieldType#>& <#=field.FieldName#><#

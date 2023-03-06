@@ -9,11 +9,12 @@
 <# 
 foreach(GrpcMessage message in s.MessageArray)
 {
-if(message.HasNativeMake)
+if(message.HasNativeMake || message is GrpcMessage_Oneof)
 {
 #>
-<#=message.Name#> U<#=message.Name.Substring(1)#>HelperLibrary::Make<#=message.CamelName#>(
-    <#
+<#=message.Name#> U<#=message.Name.Substring(1)#>HelperLibrary::Make<#=message.CamelName#>(<#if(message is GrpcMessage_Oneof){ GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message; #><#=oneofMessage.OneofEnum.Name#> <#=oneofMessage.CamelName#>Case, 
+<#}else{#> 
+<#}#>    <#
 for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
 #><#=field.FieldType#> <#=field.FieldName#><#
@@ -23,6 +24,12 @@ if(index==(message.Fields.Count-1)){#>
 )
 {
     <#=message.Name#> <#=message.CamelName#>;
+<#
+if(message is GrpcMessage_Oneof) { 
+    GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message; 
+#>
+    <#=message.CamelName#>.<#=oneofMessage.CamelName#>Case = <#=oneofMessage.CamelName#>Case;
+<#}#>
 <#for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
 #>
@@ -53,8 +60,9 @@ GrpcMessageField_Repeated repeatedField = (GrpcMessageField_Repeated)field;
     return <#=message.CamelName#>;
 }
 
-void U<#=message.Name.Substring(1)#>HelperLibrary::Break<#=message.CamelName#>(const <#=message.Name#>& <#=message.CamelName#>, 
-    <#
+void U<#=message.Name.Substring(1)#>HelperLibrary::Break<#=message.CamelName#>(const <#=message.Name#>& <#=message.CamelName#>, <#if(message is GrpcMessage_Oneof){ GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message; #><#=oneofMessage.OneofEnum.Name#>& <#=oneofMessage.CamelName#>Case, 
+<#}else{#> 
+<#}#>    <#
 for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
 #><#=field.FieldType#>& <#=field.FieldName#><#
@@ -63,6 +71,12 @@ if(index==(message.Fields.Count-1)){#>
     <#}else{#>, <#}}#>
 )
 {
+<#
+if(message is GrpcMessage_Oneof) { 
+    GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message; 
+#>
+    <#=oneofMessage.CamelName#>Case = <#=message.CamelName#>.<#=oneofMessage.CamelName#>Case;
+<#}#>
 <#for(int index=0; index<message.Fields.Count; index++){
 GrpcMessageField field = message.Fields[index];
 #>

@@ -35,15 +35,15 @@ namespace protoc_gen_turbolink
 		{
 			get;
 		}
-		public string FieldGrpcType								//eg. "::Common::Gender", "::google::protobuf::Value"
+		public virtual string FieldGrpcType						//eg. "::Common::Gender", "::google::protobuf::Value"
 		{
 			get => FieldDesc.TypeName.Replace(".", "::");
 		}
-		public string FieldName									//eg. "Age", "MyName", "Gender", "AddressArray"
+		public virtual string FieldName							//eg. "Age", "MyName", "Gender", "AddressArray"
 		{
 			get => TurboLinkUtils.GetMessageFieldName(FieldDesc);
 		}
-		public string FieldGrpcName								//eg. "age", "my_name", "gender", "address_array"
+		public virtual string FieldGrpcName						//eg. "age", "my_name", "gender", "address_array"
 		{
 			get => FieldDesc.Name.ToLower();
 		}
@@ -108,6 +108,38 @@ namespace protoc_gen_turbolink
 			get => NeedNativeMake ? ("TMap<" + KeyField.FieldType + ", TSharedPtr<" + ValueField.FieldType + ">>") : FieldType;
 		}
 	}
+	public class GrpcMessageField_Oneof : GrpcMessageField
+	{
+		public readonly GrpcMessage_Oneof OneofMessage;
+		public GrpcMessageField_Oneof(GrpcMessage_Oneof oneofMessage) : base(null)
+		{
+			OneofMessage = oneofMessage;
+		}
+		public override string FieldType
+		{
+			get => OneofMessage.Name;
+		}
+		public override string FieldGrpcType
+		{
+			get => string.Empty;	//should not be called!
+		}
+		public override string FieldName
+		{
+			get => OneofMessage.CamelName;
+		}
+		public override string FieldGrpcName
+		{
+			get => string.Empty;	//should not be called!
+		}
+		public override string TypeAsNativeField
+		{
+			get => string.Empty;	//should not be called!
+		}
+		public override string FieldDefaultValue
+		{
+			get => string.Empty;    //should not be called!
+		}
+	}
 
 	public class GrpcMessage
 	{
@@ -117,29 +149,28 @@ namespace protoc_gen_turbolink
 		{
 			MessageDesc = messageDesc;
 			ServiceFile = serviceFile;
-			Index = serviceFile.MessageArray.Count;
 			Fields = new List<GrpcMessageField>();
 			HasNativeMake = false;
 		}
 		public int Index { get; set; }
-		public string Name                                      //eg. "FGrpcGreeterHelloResponse",  "FGrpcGoogleProtobufValue"
+		public virtual string Name                               //eg. "FGrpcGreeterHelloResponse",  "FGrpcGoogleProtobufValue"
 		{
 			get => "FGrpc" +
 				ServiceFile.CamelPackageName +
 				TurboLinkUtils.JoinCamelString(ParentMessageNameList, string.Empty) +
 				CamelName;
 		}
-		public string CamelName									//eg. "HelloResponse", "Value"
+		public virtual string CamelName							//eg. "HelloResponse", "Value"
 		{
 			get => TurboLinkUtils.MakeCamelString(MessageDesc.Name);
 		}
-		public string GrpcName                                  //eg. "Greeter::HelloResponse", "google::protobuf::Value"
+		public virtual string GrpcName                           //eg. "Greeter::HelloResponse", "google::protobuf::Value"
 		{
 			get => ServiceFile.GrpcPackageName + "::" +
 				TurboLinkUtils.JoinString(ParentMessageNameList, "::") +
 				MessageDesc.Name;
 		}
-		public string DisplayName                               //eg. "Greeter.HelloResponse", "GoogleProtobuf.Value"
+		public virtual string DisplayName						//eg. "Greeter.HelloResponse", "GoogleProtobuf.Value"
 		{
 			get => ServiceFile.CamelPackageName + "." +
 				TurboLinkUtils.JoinCamelString(ParentMessageNameList, ".") +
@@ -148,7 +179,34 @@ namespace protoc_gen_turbolink
 		public string[] ParentMessageNameList;
 		public List<GrpcMessageField> Fields { get; set; }
 		public bool HasNativeMake { get; set; }
-
+	}
+	public class GrpcMessage_Oneof : GrpcMessage
+	{
+		public readonly OneofDescriptorProto OneofDesc;
+		public readonly GrpcMessage ParentMessage;
+		public readonly GrpcEnum OneofEnum;
+		public GrpcMessage_Oneof(OneofDescriptorProto oneofDesc, GrpcMessage parentMessage, GrpcEnum oneofEnum) : base(null, parentMessage.ServiceFile)
+		{
+			OneofDesc = oneofDesc;
+			ParentMessage = parentMessage;
+			OneofEnum = oneofEnum;
+		}
+		public override string Name								//eg. "FGrpcGoogleProtobufValueKind"
+		{
+			get => ParentMessage.Name + CamelName;
+		}
+		public override string CamelName                         //eg. "Kind"
+		{
+			get => TurboLinkUtils.MakeCamelString(OneofDesc.Name);
+		}
+		public override string GrpcName							//eg. "kind"
+		{
+			get => OneofDesc.Name;
+		}
+		public override string DisplayName						//eg. "GoogleProtobuf.Value.Kind"
+		{
+			get => ParentMessage.DisplayName + "." + CamelName;
+		}
 	}
 	public class GrpcServiceMethod
 	{
@@ -277,7 +335,7 @@ namespace protoc_gen_turbolink
 				AddEnums(protoFileName);
 			}
 
-			//step 4: message(include nested message)
+			//step 4: message(include nested message and oneof message)
 			foreach (string protoFileName in GrpcServiceFiles.Keys.ToList())
 			{
 				AddMessages(protoFileName);
@@ -382,7 +440,10 @@ namespace protoc_gen_turbolink
 		}
 		private void AddMessage(ref GrpcServiceFile serviceFile, string[] parentMessageNameList, DescriptorProto protoMessage)
 		{
-			//add nested message first
+			GrpcMessage message = new GrpcMessage(protoMessage, serviceFile);
+			message.ParentMessageNameList = parentMessageNameList;
+
+			//add nested message 
 			if (protoMessage.NestedType.Count > 0)
 			{
 				string[] currentMessageNameList = new string[parentMessageNameList.Length + 1];
@@ -396,34 +457,81 @@ namespace protoc_gen_turbolink
 				}
 			}
 
-			GrpcMessage message = new GrpcMessage(protoMessage, serviceFile);
-			message.ParentMessageNameList = parentMessageNameList;
-			serviceFile.Message2IndexMap.Add(
-				"." + serviceFile.PackageName + "." +
-				TurboLinkUtils.JoinString(parentMessageNameList, ".") +
-				protoMessage.Name, 
-				message.Index);
+			//add oneof message
+			//key=oneof message index in parent message, value.1=enum index in service, value.2=message index in service
+			Dictionary<int, Tuple<int, int>> oneofMessageMap = new Dictionary<int, Tuple<int, int>>(); 
+			if (protoMessage.OneofDecl.Count > 0)
+			{
+				for(int i=0; i< protoMessage.OneofDecl.Count; i++)
+				{
+					oneofMessageMap.Add(i, new Tuple<int, int>(serviceFile.EnumArray.Count, serviceFile.MessageArray.Count));
 
+					GrpcEnum oneofEnum = new GrpcEnum();
+
+					//add oneof message 
+					GrpcMessage_Oneof oneofMessage = new GrpcMessage_Oneof(protoMessage.OneofDecl[i], message, oneofEnum);
+					oneofMessage.Index = serviceFile.MessageArray.Count;
+					serviceFile.MessageArray.Add(oneofMessage);
+
+					//add oneof enum
+					oneofEnum.Name = "EGrpc" + oneofMessage.Name.Substring(5);
+					oneofEnum.DisplayName = oneofMessage.DisplayName;
+					oneofEnum.Fields = new List<GrpcEnumField>();
+					serviceFile.EnumArray.Add(oneofEnum);
+				}
+			}
+
+			//add message field
 			foreach (FieldDescriptorProto field in protoMessage.Field)
 			{
+				GrpcMessageField messageField = null;
 				bool isMapField;
 				FieldDescriptorProto keyField, valueField;
 				(isMapField, keyField, valueField) = TurboLinkUtils.IsMapField(field, protoMessage);
 				if (isMapField)
 				{
-					message.Fields.Add(new GrpcMessageField_Map(field, keyField, valueField));
+					messageField = new GrpcMessageField_Map(field, keyField, valueField);
 				}
 				else if (field.Label == FieldDescriptorProto.Types.Label.Repeated)
 				{
-					message.Fields.Add(new GrpcMessageField_Repeated(field));
+					messageField = new GrpcMessageField_Repeated(field);
 				}
 				else
 				{
-					message.Fields.Add(new GrpcMessageField_Single(field));
+					messageField = new GrpcMessageField_Single(field);
+				}
+
+				if (field.HasOneofIndex)
+				{
+					//add enum field
+					GrpcEnum oneofEnum = serviceFile.EnumArray[oneofMessageMap[field.OneofIndex].Item1];
+					GrpcEnumField oneofEnumField = new GrpcEnumField();
+					oneofEnumField.Name = messageField.FieldName;
+					oneofEnumField.Number = oneofEnum.Fields.Count;
+					oneofEnum.Fields.Add(oneofEnumField);
+
+					//add field to one of message
+					GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)serviceFile.MessageArray[oneofMessageMap[field.OneofIndex].Item2];
+					if (oneofMessage.Fields.Count == 0)
+					{
+						//first field of oneof zone, add oneof field to parent message
+						GrpcMessageField_Oneof oneofField = new GrpcMessageField_Oneof(oneofMessage);
+						message.Fields.Add(oneofField);
+					}
+					oneofMessage.Fields.Add(messageField);
+				}
+				else
+				{
+					message.Fields.Add(messageField);
 				}
 			}
+			message.Index = serviceFile.MessageArray.Count;
+			serviceFile.Message2IndexMap.Add(
+				"." + serviceFile.PackageName + "." +
+				TurboLinkUtils.JoinString(parentMessageNameList, ".") +
+				protoMessage.Name,
+				message.Index);
 			serviceFile.MessageArray.Add(message);
-
 		}
 		private void AddServices(string protoFileName)
 		{
@@ -452,7 +560,8 @@ namespace protoc_gen_turbolink
 			{
 				foreach(GrpcMessageField messageField in message.Fields)
 				{
-					if (messageField.FieldDesc.Type != FieldDescriptorProto.Types.Type.Message) continue;
+					if (messageField.FieldDesc==null || //Oneof message field
+						messageField.FieldDesc.Type != FieldDescriptorProto.Types.Type.Message) continue;
 					string typeName = messageField.FieldDesc.TypeName;
 
 					if (messageField is GrpcMessageField_Map)
