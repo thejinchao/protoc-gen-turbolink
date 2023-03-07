@@ -21,6 +21,7 @@ namespace protoc_gen_turbolink
 		public string Name { get; set; }                //eg. "EGrpcCommonGender"
 		public string DisplayName { get; set; }         //eg. "Common.Gender"
 		public List<GrpcEnumField> Fields { get; set; }
+		public bool MissingZeroField = false;
 	}
 
 	abstract public class GrpcMessageField
@@ -417,13 +418,16 @@ namespace protoc_gen_turbolink
 				enumDesc.Name;
 
 			newEnum.Fields = new List<GrpcEnumField>();
+			bool missingZeroField = true;
 			foreach (EnumValueDescriptorProto enumValue in enumDesc.Value)
 			{
 				GrpcEnumField newEnumField = new GrpcEnumField();
 				newEnumField.Name = enumValue.Name;
 				newEnumField.Number = enumValue.Number;
 				newEnum.Fields.Add(newEnumField);
+				if (enumValue.Number == 0) missingZeroField = false;
 			}
+			newEnum.MissingZeroField = missingZeroField;
 			serviceFile.EnumArray.Add(newEnum);
 		}
 		private void AddMessages(string protoFileName)

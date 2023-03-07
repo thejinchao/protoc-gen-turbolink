@@ -23,6 +23,9 @@ foreach (GrpcEnum enumDefine in s.EnumArray)
 UENUM(BlueprintType, meta = (DisplayName="<#=enumDefine.DisplayName#>"))
 enum class <#=enumDefine.Name#> : uint8
 {
+<#if(enumDefine.MissingZeroField) {#>
+    _ZERO_RESERVED_FIELD_=0 UMETA(Hidden),
+<#}#>
 <#
 foreach (GrpcEnumField enumField in enumDefine.Fields)
 {
