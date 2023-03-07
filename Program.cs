@@ -18,6 +18,25 @@ namespace protoc_gen_turbolink
             CodeGeneratorRequest request = new CodeGeneratorRequest();
             request.MergeFrom(inputStream);
 
+            //read request param
+            bool dumpRequest = false;
+            bool dumpCollection = false;
+            if(request.HasParameter)
+			{
+                Dictionary<string, string> paramDictionary = request.Parameter
+                    .Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries)
+                    .GroupBy(param => param.Split('=')[0], param => param.Split('=')[1])
+                    .ToDictionary(x => x.Key, x => x.First());
+                if(paramDictionary.ContainsKey("DumpRequest") && paramDictionary["DumpRequest"].ToLower()=="true")
+				{
+                    dumpRequest = true;
+                }
+                if (paramDictionary.ContainsKey("DumpCollection") && paramDictionary["DumpCollection"].ToLower() == "true")
+                {
+                    dumpCollection = true;
+                }
+            }
+
             //create code generator reponse
             CodeGeneratorResponse response = new CodeGeneratorResponse();
             //supported features(optional field)
@@ -48,19 +67,25 @@ namespace protoc_gen_turbolink
                     response.File.Add(newFile);
                 }
             }
-            /*
+
             //dump input request
-            CodeGeneratorResponse.Types.File request_file = new CodeGeneratorResponse.Types.File();
-            request_file.Name = collection.InputFileNames + "request.json";
-            request_file.Content = request.ToString();
-            response.File.Add(request_file);
-            
+            if (dumpRequest)
+            {
+                CodeGeneratorResponse.Types.File request_file = new CodeGeneratorResponse.Types.File();
+                request_file.Name = collection.InputFileNames + "request.json";
+                request_file.Content = request.ToString();
+                response.File.Add(request_file);
+            }
+
             //dump service collection
-            CodeGeneratorResponse.Types.File service_collection = new CodeGeneratorResponse.Types.File();
-            service_collection.Name = collection.InputFileNames + "collection.json";
-            service_collection.Content = collection.DumpToString();
-            response.File.Add(service_collection);
-            */
+            if (dumpCollection)
+            {
+                CodeGeneratorResponse.Types.File service_collection = new CodeGeneratorResponse.Types.File();
+                service_collection.Name = collection.InputFileNames + "collection.json";
+                service_collection.Content = collection.DumpToString();
+                response.File.Add(service_collection);
+            }
+            
             WriteResponse(response);
         }
         private static void WriteResponse(CodeGeneratorResponse response)
