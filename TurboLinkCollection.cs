@@ -585,11 +585,5 @@ namespace protoc_gen_turbolink
 				}
 			}
 		}
-
-		public string DumpToString()
-		{
-			var options = new JsonSerializerOptions { WriteIndented = true };
-			return JsonSerializer.Serialize(GrpcServiceFiles, options);
-		}
 	}
 }

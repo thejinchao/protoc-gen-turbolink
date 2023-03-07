@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
 using Google.Protobuf;
 using Google.Protobuf.Compiler;
 using Google.Protobuf.Reflection;
@@ -73,7 +74,7 @@ namespace protoc_gen_turbolink
             {
                 CodeGeneratorResponse.Types.File request_file = new CodeGeneratorResponse.Types.File();
                 request_file.Name = collection.InputFileNames + "request.json";
-                request_file.Content = request.ToString();
+                request_file.Content = JsonSerializer.Serialize(request, new JsonSerializerOptions { WriteIndented = true });
                 response.File.Add(request_file);
             }
 
@@ -82,7 +83,7 @@ namespace protoc_gen_turbolink
             {
                 CodeGeneratorResponse.Types.File service_collection = new CodeGeneratorResponse.Types.File();
                 service_collection.Name = collection.InputFileNames + "collection.json";
-                service_collection.Content = collection.DumpToString();
+                service_collection.Content = JsonSerializer.Serialize(collection.GrpcServiceFiles, new JsonSerializerOptions { WriteIndented = true });
                 response.File.Add(service_collection);
             }
             
