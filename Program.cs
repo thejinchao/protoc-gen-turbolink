@@ -54,9 +54,9 @@ namespace protoc_gen_turbolink
                 return;
             }
 
-            foreach (FileDescriptorProto protoFile in request.ProtoFile)
+            foreach(GrpcServiceFile serviceFile in collection.GrpcServiceFiles.Values)
             {
-                TurboLinkGenerator generator = new TurboLinkGenerator(protoFile, collection.GrpcServiceFiles[protoFile.Name]);
+                TurboLinkGenerator generator = new TurboLinkGenerator(serviceFile.ProtoFileDesc, serviceFile);
                 generator.BuildOutputFiles();
 
                 foreach (GeneratedFile generatedFile in generator.GeneratedFiles)
