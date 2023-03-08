@@ -31,6 +31,15 @@ namespace protoc_gen_turbolink
 		{
 			FieldDesc = fieldDesc;
 			NeedNativeMake = false;
+			if (fieldDesc != null)
+			{
+				FieldGrpcName = fieldDesc.Name.ToLower();
+				if(TurboLinkUtils.CppKeyWords.Contains(FieldGrpcName))
+				{
+					//add underline if grpc name same as any cpp keywords
+					FieldGrpcName += "_";
+				}
+			}
 		}
 		public abstract string FieldType						//eg. "int32", "FString", "EGrpcCommonGender", "TArray<FGrpcUserRegisterRequestAddress>"
 		{
@@ -44,10 +53,7 @@ namespace protoc_gen_turbolink
 		{
 			get => TurboLinkUtils.GetMessageFieldName(FieldDesc);
 		}
-		public virtual string FieldGrpcName						//eg. "age", "my_name", "gender", "address_array"
-		{
-			get => FieldDesc.Name.ToLower();
-		}
+		public string FieldGrpcName { get; set; }				//eg. "age", "my_name", "gender", "address_array"
 		public abstract string TypeAsNativeField                //eg. "TSharedPtr<FGrpcUserRegisterRequestAddress>", "TArray<TSharedPtr<FGrpcUserRegisterRequestAddress>>"
 		{
 			get;
@@ -127,10 +133,6 @@ namespace protoc_gen_turbolink
 		public override string FieldName
 		{
 			get => OneofMessage.CamelName;
-		}
-		public override string FieldGrpcName
-		{
-			get => string.Empty;	//should not be called!
 		}
 		public override string TypeAsNativeField
 		{
