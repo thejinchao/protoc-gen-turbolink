@@ -14,7 +14,9 @@ foreach (string dependency in s.DependencyFiles)
 #>
 #include "<#=dependency#>Message.h"
 <#}#>
+<#if(s.EnumArray.Count>0 || s.MessageArray.Count>0) {#>
 #include "<#=s.CamelFileName#>Message.generated.h"
+<#}#>
 <#
 foreach (GrpcEnum enumDefine in s.EnumArray)
 {
