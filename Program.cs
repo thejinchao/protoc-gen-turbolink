@@ -26,7 +26,7 @@ namespace protoc_gen_turbolink
 			{
                 Dictionary<string, string> paramDictionary = request.Parameter
                     .Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries)
-                    .GroupBy(param => param.Split('=')[0], param => param.Split('=')[1])
+                    .GroupBy(param => param.Split('=')[0].Trim(), param => param.Split('=')[1].Trim())
                     .ToDictionary(x => x.Key, x => x.First());
                 if(paramDictionary.ContainsKey("DumpRequest") && paramDictionary["DumpRequest"].ToLower()=="true")
 				{
