@@ -58,16 +58,15 @@ namespace protoc_gen_turbolink
 		{
 			get;
 		}
-		public virtual string FieldDefaultValue
-		{
-			get => string.Empty;
-		}
+		public string FieldDefaultValue { get; set; }   //eg. "=0", '=""', "= static_cast<EGrpcCommonGender>(0)", ""
 		public bool NeedNativeMake { get; set; }
 	}
 	public class GrpcMessageField_Single : GrpcMessageField
 	{
 		public GrpcMessageField_Single(FieldDescriptorProto fieldDesc) : base(fieldDesc)
-		{ }
+		{
+			FieldDefaultValue = TurboLinkUtils.GetFieldDefaultValue(FieldDesc, FieldDesc.HasDefaultValue ? FieldDesc.DefaultValue : null);
+		}
 		public override string FieldType
 		{
 			get => TurboLinkUtils.GetFieldType(FieldDesc);
@@ -75,10 +74,6 @@ namespace protoc_gen_turbolink
 		public override string TypeAsNativeField
 		{
 			get => NeedNativeMake ? ("TSharedPtr<" + TurboLinkUtils.GetFieldType(FieldDesc) + ">") : FieldType;
-		}
-		public override string FieldDefaultValue				//eg. "=0", '=""', "= static_cast<EGrpcCommonGender>(0)", ""
-		{
-			get => TurboLinkUtils.GetFieldDefaultValue(FieldDesc);
 		}
 	}
 	public class GrpcMessageField_Repeated : GrpcMessageField
@@ -137,10 +132,6 @@ namespace protoc_gen_turbolink
 		public override string TypeAsNativeField
 		{
 			get => string.Empty;	//should not be called!
-		}
-		public override string FieldDefaultValue
-		{
-			get => string.Empty;    //should not be called!
 		}
 	}
 

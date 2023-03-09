@@ -102,9 +102,9 @@ namespace protoc_gen_turbolink
             }
             return fieldName;
         }
-        public static string GetFieldDefaultValue(FieldDescriptorProto field)
+        public static string GetFieldDefaultValue(FieldDescriptorProto field, string defaultValue)
         {
-            string defaultValue = " = ";
+            string finalDefaultValue = " = ";
             switch (field.Type)
             {
                 case FieldDescriptorProto.Types.Type.Double:
@@ -119,17 +119,21 @@ namespace protoc_gen_turbolink
                 case FieldDescriptorProto.Types.Type.Sfixed64:
                 case FieldDescriptorProto.Types.Type.Sint32:
                 case FieldDescriptorProto.Types.Type.Sint64:
-                    defaultValue += "0"; break;
+                    finalDefaultValue += defaultValue != null ? defaultValue : "0"; 
+                    break;
                 case FieldDescriptorProto.Types.Type.Bool:
-                    defaultValue += "false"; break;
+                    finalDefaultValue += defaultValue != null ? defaultValue : "false"; 
+                    break;
                 case FieldDescriptorProto.Types.Type.String:
-                    defaultValue += "\"\""; break;
+                    finalDefaultValue += defaultValue != null ? ("\"" + defaultValue + "\"") : "\"\""; 
+                    break;
                 case FieldDescriptorProto.Types.Type.Enum:
-                    defaultValue += "static_cast<" + GetFieldType(field) + ">(0)"; break;
+                    finalDefaultValue += defaultValue != null ? (GetFieldType(field) + "::" + defaultValue):("static_cast<" + GetFieldType(field) + ">(0)"); 
+                    break;
                 default:
                     return "";
             }
-            return defaultValue;
+            return finalDefaultValue;
         }
         public static (bool, FieldDescriptorProto, FieldDescriptorProto) IsMapField(FieldDescriptorProto field, DescriptorProto message)
         {
