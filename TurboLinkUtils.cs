@@ -61,37 +61,31 @@ namespace protoc_gen_turbolink
                 case FieldDescriptorProto.Types.Type.Float:
                     ueType += "float"; break;
                 case FieldDescriptorProto.Types.Type.Int64:
-                    ueType += "FInt64"; break;
+                case FieldDescriptorProto.Types.Type.Sfixed64:
+                case FieldDescriptorProto.Types.Type.Sint64:
+                    ueType += "int64"; break;
                 case FieldDescriptorProto.Types.Type.Uint64:
-                    ueType += "FUInt64"; break;
-                case FieldDescriptorProto.Types.Type.Int32:
-                    ueType += "int32"; break;
                 case FieldDescriptorProto.Types.Type.Fixed64:
                     ueType += "FUInt64"; break;
+                case FieldDescriptorProto.Types.Type.Int32:
+                case FieldDescriptorProto.Types.Type.Sfixed32:
+                case FieldDescriptorProto.Types.Type.Sint32:
+                    ueType += "int32"; break;
                 case FieldDescriptorProto.Types.Type.Fixed32:
+                case FieldDescriptorProto.Types.Type.Uint32:
                     ueType += "FUInt32"; break;
                 case FieldDescriptorProto.Types.Type.Bool:
                     ueType += "bool"; break;
                 case FieldDescriptorProto.Types.Type.String:
                     ueType += "FString"; break;
                 case FieldDescriptorProto.Types.Type.Group:
-                    break; //TODO
+                    break; //Group type is deprecated and not supported in proto3
                 case FieldDescriptorProto.Types.Type.Message:
                     ueType += GetMessageName(field.TypeName); break;
                 case FieldDescriptorProto.Types.Type.Bytes:
                     ueType += "FBytes"; break;
-                case FieldDescriptorProto.Types.Type.Uint32:
-                    ueType += "FUInt32"; break;
                 case FieldDescriptorProto.Types.Type.Enum:
                     ueType += GetMessageName(field.TypeName, "EGrpc"); break;
-                case FieldDescriptorProto.Types.Type.Sfixed32:
-                    ueType += "int32"; break;
-                case FieldDescriptorProto.Types.Type.Sfixed64:
-                    ueType += "FInt64"; break;
-                case FieldDescriptorProto.Types.Type.Sint32:
-                    ueType += "int32"; break;
-                case FieldDescriptorProto.Types.Type.Sint64:
-                    ueType += "FInt64"; break;
                 default:
                     ueType += "ERROR_TYPE"; break;
             }
