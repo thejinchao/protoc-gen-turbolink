@@ -40,6 +40,7 @@ namespace protoc_gen_turbolink
 					FieldGrpcName += "_";
 				}
 			}
+			FieldDefaultValue = string.Empty;
 		}
 		public abstract string FieldType						//eg. "int32", "FString", "EGrpcCommonGender", "TArray<FGrpcUserRegisterRequestAddress>"
 		{
