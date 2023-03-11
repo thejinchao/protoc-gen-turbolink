@@ -145,13 +145,14 @@ if(field is GrpcMessageField_Map) {
 <#+if(field.NeedNativeMake) { #>
         <#=mapField.ValueField.FieldGrpcType#> value;
         TURBOLINK_TO_GRPC(item.Value.Get(), &value);
+        (*(out->mutable_<#=mapField.FieldGrpcName#>()))[<#+ConvertFieldFromTurboLinkToGrpc(mapField.KeyField, "item.Key");#>] = value;
 <#+} else if(mapField.ValueField.FieldDesc.Type==FieldDescriptorProto.Types.Type.Message) { #>
         <#=mapField.ValueField.FieldGrpcType#> value;
         TURBOLINK_TO_GRPC(&item.Value, &value);
-<#+}else {#>
-        auto value = <#+ConvertFieldFromTurboLinkToGrpc(mapField.ValueField, "item.Value");#>;
-<#+}#>
         (*(out->mutable_<#=mapField.FieldGrpcName#>()))[<#+ConvertFieldFromTurboLinkToGrpc(mapField.KeyField, "item.Key");#>] = value;
+<#+}else {#>
+        (*(out->mutable_<#=mapField.FieldGrpcName#>()))[<#+ConvertFieldFromTurboLinkToGrpc(mapField.KeyField, "item.Key");#>] = <#+ConvertFieldFromTurboLinkToGrpc(mapField.ValueField, "item.Value");#>;
+<#+}#>
     }
 <#+} else if(field is GrpcMessageField_Repeated) { #>
     for(const auto& value : in-><#=field.FieldName#>) {
