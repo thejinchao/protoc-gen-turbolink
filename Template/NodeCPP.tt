@@ -19,8 +19,8 @@ foreach(GrpcService service in s.ServiceArray)
 
 UCall<#=service.Name#><#=method.Name#>* UCall<#=service.Name#><#=method.Name#>::<#=method.Name#>(UObject* WorldContextObject, const <#=method.InputType#>& Request)
 {
-	UCall<#=service.Name#><#=method.Name#>* node = NewObject<UCall<#=service.Name#><#=method.Name#>>();
-	UTurboLinkGrpcManager* turboLinkManager = UTurboLinkGrpcUtilities::GetTurboLinkGrpcManager();
+	UCall<#=service.Name#><#=method.Name#>* node = NewObject<UCall<#=service.Name#><#=method.Name#>>(WorldContextObject);
+	UTurboLinkGrpcManager* turboLinkManager = UTurboLinkGrpcUtilities::GetTurboLinkGrpcManager(WorldContextObject);
 
 	node-><#=service.Name#> = Cast<U<#=service.Name#>>(turboLinkManager->MakeService("<#=service.Name#>"));
 	if (node-><#=service.Name#> == nullptr)
@@ -93,7 +93,7 @@ void UCall<#=service.Name#><#=method.Name#>::Shutdown()
 
 	if (<#=service.Name#> != nullptr)
 	{
-		UTurboLinkGrpcUtilities::GetTurboLinkGrpcManager()->ReleaseService(<#=service.Name#>);
+		UTurboLinkGrpcUtilities::GetTurboLinkGrpcManager(this)->ReleaseService(<#=service.Name#>);
 		<#=service.Name#> = nullptr;
 	}
 
