@@ -12,6 +12,19 @@ namespace protoc_gen_turbolink
 {
     class Program
     {
+        static bool GetParam(Dictionary<string, string> paramDictionary, string paramName, bool defaultValue)
+		{
+            if (!paramDictionary.ContainsKey(paramName))
+            {
+                return defaultValue;
+            }
+            string paramValue = paramDictionary[paramName].ToLower();
+            if (paramValue != "true" && paramValue != "false")
+            {
+                return defaultValue;
+            }
+            return paramValue == "true" ? true : false;
+        }
         static void Main(string[] args)
         {
             //read code generator request from stdin.
@@ -22,20 +35,18 @@ namespace protoc_gen_turbolink
             //read request param
             bool dumpRequest = false;
             bool dumpCollection = false;
-            if(request.HasParameter)
+            bool generateServiceCode = true;
+
+            if (request.HasParameter)
 			{
                 Dictionary<string, string> paramDictionary = request.Parameter
                     .Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries)
                     .GroupBy(param => param.Split('=')[0].Trim(), param => param.Split('=')[1].Trim())
                     .ToDictionary(x => x.Key, x => x.First());
-                if(paramDictionary.ContainsKey("DumpRequest") && paramDictionary["DumpRequest"].ToLower()=="true")
-				{
-                    dumpRequest = true;
-                }
-                if (paramDictionary.ContainsKey("DumpCollection") && paramDictionary["DumpCollection"].ToLower() == "true")
-                {
-                    dumpCollection = true;
-                }
+
+                dumpRequest = GetParam(paramDictionary, "DumpRequest", false);
+                dumpCollection = GetParam(paramDictionary, "DumpCollection", false);
+                generateServiceCode = GetParam(paramDictionary, "GenerateServiceCode", true);
             }
 
             //create code generator reponse
@@ -54,10 +65,10 @@ namespace protoc_gen_turbolink
                 return;
             }
 
-            foreach(GrpcServiceFile serviceFile in collection.GrpcServiceFiles.Values)
+            foreach (GrpcServiceFile serviceFile in collection.GrpcServiceFiles.Values)
             {
                 TurboLinkGenerator generator = new TurboLinkGenerator(serviceFile.ProtoFileDesc, serviceFile);
-                generator.BuildOutputFiles();
+                generator.BuildOutputFiles(generateServiceCode);
 
                 foreach (GeneratedFile generatedFile in generator.GeneratedFiles)
                 {
