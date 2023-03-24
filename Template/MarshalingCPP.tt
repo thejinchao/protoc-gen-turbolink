@@ -56,6 +56,7 @@ void GRPC_TO_TURBOLINK(const ::<#=message.GrpcName#>* in, <#=message.Name#>* out
 if(field is GrpcMessageField_Map) {
     GrpcMessageField_Map mapField = (GrpcMessageField_Map)field;
 #>
+    out-><#=mapField.FieldName#>.Empty();
     for (const auto& item : in-><#=mapField.FieldGrpcName#>()) {
 <#+if(field.NeedNativeMake) { #>
         <#=mapField.ValueField.FieldType#> field;
@@ -73,6 +74,7 @@ if(field is GrpcMessageField_Map) {
 } else if(field is GrpcMessageField_Repeated) { 
     GrpcMessageField_Repeated repeatedField = (GrpcMessageField_Repeated)field;
 #>
+    out-><#=repeatedField.FieldName#>.Empty();
     for (int i=0; i<in-><#=repeatedField.FieldGrpcName#>_size(); ++i) {
 <#+if(field.NeedNativeMake) { #>
         <#=repeatedField.ItemField.FieldType#> field;
