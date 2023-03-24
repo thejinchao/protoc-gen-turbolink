@@ -36,6 +36,7 @@ namespace protoc_gen_turbolink
             bool dumpRequest = false;
             bool dumpCollection = false;
             bool generateServiceCode = true;
+            bool generateJsonCode = false;
 
             if (request.HasParameter)
 			{
@@ -47,6 +48,7 @@ namespace protoc_gen_turbolink
                 dumpRequest = GetParam(paramDictionary, "DumpRequest", false);
                 dumpCollection = GetParam(paramDictionary, "DumpCollection", false);
                 generateServiceCode = GetParam(paramDictionary, "GenerateServiceCode", true);
+                generateJsonCode = GetParam(paramDictionary, "GenerateJsonCode", false);
             }
 
             //create code generator reponse
@@ -68,7 +70,7 @@ namespace protoc_gen_turbolink
             foreach (GrpcServiceFile serviceFile in collection.GrpcServiceFiles.Values)
             {
                 TurboLinkGenerator generator = new TurboLinkGenerator(serviceFile.ProtoFileDesc, serviceFile);
-                generator.BuildOutputFiles(generateServiceCode);
+                generator.BuildOutputFiles(generateServiceCode, generateJsonCode);
 
                 foreach (GeneratedFile generatedFile in generator.GeneratedFiles)
                 {

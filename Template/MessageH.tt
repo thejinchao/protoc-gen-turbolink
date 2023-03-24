@@ -54,6 +54,11 @@ struct <#=message.Name#> : public FGrpcMessage
 {
     GENERATED_BODY()
 <#
+if(g.GenerateJsonCode && !(message is GrpcMessage_Oneof)) {
+#>
+    DECLARE_JSON_FUNCTIONS()
+<#}#>
+<#
 if(message is GrpcMessage_Oneof) {
 GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message;
 #>
