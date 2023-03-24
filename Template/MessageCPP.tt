@@ -110,7 +110,10 @@ GrpcMessageField_Repeated repeatedField = (GrpcMessageField_Repeated)field;
         <#=field.FieldName#>.Add(*(element.Get()));
     }
 <#}else{#>
-    <#=field.FieldName#> = *(<#=message.CamelName#>.<#=field.FieldName#>.Get());
+    if(<#=message.CamelName#>.<#=field.FieldName#>.Get()) 
+    {
+        <#=field.FieldName#> = *(<#=message.CamelName#>.<#=field.FieldName#>.Get());
+    }
 <#}#>
 <#}else{#>
     <#=field.FieldName#> = <#=message.CamelName#>.<#=field.FieldName#>;
