@@ -101,11 +101,14 @@ foreach(GrpcMessageField fieldOfOneofMessage in oneofMessage.Fields)
         <#=fieldOfOneofMessage.FieldType#> field;
         GRPC_TO_TURBOLINK(&(in-><#=fieldOfOneofMessage.FieldGrpcName#>()), &field);
         out-><#=field.FieldName#>.<#=fieldOfOneofMessage.FieldName#>=MakeShareable(new <#=fieldOfOneofMessage.FieldType#>(field));
+        out-><#=field.FieldName#>.<#=field.FieldName#>Case = <#=oneofMessage.OneofEnum.Name#>::<#=fieldOfOneofMessage.FieldName#>;
     }
 <#+}else if(fieldOfOneofMessage.FieldDesc.Type==FieldDescriptorProto.Types.Type.Message) { #>
         GRPC_TO_TURBOLINK(&(in-><#=fieldOfOneofMessage.FieldGrpcName#>()), &(out-><#=field.FieldName#>.<#=fieldOfOneofMessage.FieldName#>));
+        out-><#=field.FieldName#>.<#=field.FieldName#>Case = <#=oneofMessage.OneofEnum.Name#>::<#=fieldOfOneofMessage.FieldName#>;
 <#+} else { string getField = "in->"+fieldOfOneofMessage.FieldGrpcName+"()"; #>
         out-><#=field.FieldName#>.<#=fieldOfOneofMessage.FieldName#>=<#+ConvertFieldFromGrpcToTurboLink(fieldOfOneofMessage, getField);#>;
+        out-><#=field.FieldName#>.<#=field.FieldName#>Case = <#=oneofMessage.OneofEnum.Name#>::<#=fieldOfOneofMessage.FieldName#>;
 <#+}#>
         break;
 <#+
