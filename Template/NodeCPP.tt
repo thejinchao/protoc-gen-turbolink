@@ -69,15 +69,15 @@ void UCall<#=service.Name#><#=method.Name#>::OnContextStateChange(FGrpcContextHa
 	}
 }
 
-void UCall<#=service.Name#><#=method.Name#>::OnResponse(FGrpcContextHandle Handle, const FGrpcResult& Result, const <#=method.OutputType#>& Response)
+void UCall<#=service.Name#><#=method.Name#>::OnResponse(FGrpcContextHandle Handle, const FGrpcResult& RpcResult, const <#=method.OutputType#>& Response)
 {
-	if (Result.Code == EGrpcResultCode::Ok)
+	if (RpcResult.Code == EGrpcResultCode::Ok)
 	{
-		OnSuccess.Broadcast(Result, Response);
+		OnSuccess.Broadcast(RpcResult, Response);
 	}
 	else
 	{
-		OnFail.Broadcast(Result, Response);
+		OnFail.Broadcast(RpcResult, Response);
 	}
 }
 

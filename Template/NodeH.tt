@@ -41,7 +41,7 @@ class TURBOLINKGRPC_API UCall<#=service.Name#><#=method.Name#> : public UBluepri
 	GENERATED_BODY()
 
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(F<#=service.Name#><#=method.Name#>Delegate, const FGrpcResult&, Result, const <#=method.OutputType#>&, Response);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(F<#=service.Name#><#=method.Name#>Delegate, const FGrpcResult&, RpcResult, const <#=method.OutputType#>&, Response);
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject", DisplayName = "Call <#=service.Name#> <#=method.Name#>"), Category = "TurboLink|<#=service.Name#>")
 	static UCall<#=service.Name#><#=method.Name#>* <#=method.Name#>(UObject* WorldContextObject, const <#=method.InputType#>& Request);
@@ -69,7 +69,7 @@ private:
 	void OnContextStateChange(FGrpcContextHandle Handle, EGrpcContextState State);
 
 	UFUNCTION()
-	void OnResponse(FGrpcContextHandle Handle, const FGrpcResult& Result, const <#=method.OutputType#>& Response);
+	void OnResponse(FGrpcContextHandle Handle, const FGrpcResult& RpcResult, const <#=method.OutputType#>& Response);
 
 	void Shutdown();
 };
