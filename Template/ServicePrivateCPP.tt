@@ -14,11 +14,11 @@ foreach(GrpcService service in s.ServiceArray)
 	{
 		if(!method.ClientStreaming) {
 #>
-void U<#=service.Name#><#=method.Name#>LambdaWrapper::OnResponse(FGrpcContextHandle _Handle, const FGrpcResult& Result, const <#=method.OutputType#>& Response)
+void U<#=service.Name#><#=method.Name#>LambdaWrapper::OnResponse(FGrpcContextHandle _Handle, const FGrpcResult& GrpcResult, const <#=method.OutputType#>& Response)
 {
 	if (_Handle != this->Handle) return;
 
-	Lambda(Result, Response);
+	Lambda(GrpcResult, Response);
 <#
 			if(!method.ServerStreaming) 
 			{

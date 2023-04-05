@@ -22,7 +22,7 @@ foreach(GrpcService service in s.ServiceArray)
 foreach (GrpcServiceMethod method in service.MethodArray)
 {
 #>
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOn<#=service.Name#><#=method.Name#>Response, FGrpcContextHandle, Handle, const FGrpcResult&, Result, const <#=method.OutputType#>&, Response);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOn<#=service.Name#><#=method.Name#>Response, FGrpcContextHandle, Handle, const FGrpcResult&, GrpcResult, const <#=method.OutputType#>&, Response);
 <#
 }
 #>
