@@ -47,8 +47,13 @@ foreach (GrpcServiceMethod method in service.MethodArray)
 {
 	if(!method.ClientStreaming) {
 #>
-	typedef TFunction<void(const FGrpcResult& GrpcResult, const <#=method.OutputType#>& Response)> F<#=method.Name#>Lambda;
-	void Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>Lambda Lambda);
+	typedef TFunction<void(const FGrpcResult& GrpcResult, const <#=method.OutputType#>& Response)> F<#=method.Name#>ResponseLambda;
+<# if(method.ServerStreaming) { #>
+	typedef TFunction<void()> F<#=method.Name#>FinishLambda;
+	void Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, F<#=method.Name#>FinishLambda FinishLambda);
+<#} else {#>
+	void Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda);
+<#}#>
 
 <#
 	}

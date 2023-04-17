@@ -60,7 +60,12 @@ if(method.ServerStreaming)
 #>
 public:
 	FGrpcContextHandle Handle;
-	U<#=service.Name#>::F<#=method.Name#>Lambda Lambda;
+	U<#=service.Name#>::F<#=method.Name#>ResponseLambda ResponseLambda;
+<#
+if(method.ServerStreaming) {
+#>
+	U<#=service.Name#>::F<#=method.Name#>FinishLambda FinishLambda;
+<# } #>
 };
 
 <#

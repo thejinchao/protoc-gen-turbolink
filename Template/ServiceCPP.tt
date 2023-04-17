@@ -74,7 +74,11 @@ void U<#=service.Name#>::Shutdown()
 		if(!method.ClientStreaming) {
 #>
 
-void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>Lambda Lambda)
+<# if(method.ServerStreaming) { #>
+void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, F<#=method.Name#>FinishLambda FinishLambda)
+<# } else {#>
+void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda)
+<#}#>
 {
 	if (InnerClient == nullptr)
 	{
@@ -82,7 +86,10 @@ void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Reque
 	}
 	U<#=service.Name#><#=method.Name#>LambdaWrapper* lambdaWrapper = NewObject<U<#=service.Name#><#=method.Name#>LambdaWrapper>();
 	lambdaWrapper->InnerClient = InnerClient;
-	lambdaWrapper->Lambda = Lambda;
+	lambdaWrapper->ResponseLambda = ResponseLambda;
+<# if(method.ServerStreaming) { #>
+	lambdaWrapper->FinishLambda = FinishLambda;
+<#}#>
 	lambdaWrapper->Handle = InnerClient->Init<#=method.Name#>();
 	InnerClient->On<#=method.Name#>Response.AddUniqueDynamic(lambdaWrapper, &U<#=service.Name#><#=method.Name#>LambdaWrapper::OnResponse);
 <#
