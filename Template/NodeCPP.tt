@@ -9,6 +9,9 @@
 #include "<#=s.TurboLinkBasicFileName#>Service.h"
 #include "TurboLinkGrpcManager.h"
 #include "TurboLinkGrpcUtilities.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
+#include "Launch/Resources/Version.h"
 <#
 foreach(GrpcService service in s.ServiceArray)
 {
