@@ -27,13 +27,13 @@ class TURBOLINKGRPC_API U<#=service.Name#> : public UGrpcService
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = TurboLink)
 	virtual void Connect() override;
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = TurboLink)
 	virtual EGrpcServiceState GetServiceState() const override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = TurboLink)
 	U<#=service.Name#>Client* MakeClient();
 
 private:

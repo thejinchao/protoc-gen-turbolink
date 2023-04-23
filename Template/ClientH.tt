@@ -48,10 +48,10 @@ public:
 foreach (GrpcServiceMethod method in service.MethodArray)
 {
 #>
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = TurboLink)
 	FGrpcContextHandle Init<#=method.Name#>();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = TurboLink)
 	void <#=method.Name#>(FGrpcContextHandle Handle, const <#=method.InputType#>& Request);
 
 <#
@@ -60,7 +60,7 @@ foreach (GrpcServiceMethod method in service.MethodArray)
 public:
 	virtual void Shutdown() override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = TurboLink)
 	void TryCancel(FGrpcContextHandle Handle);
 };
 

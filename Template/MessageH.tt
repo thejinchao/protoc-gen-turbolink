@@ -63,7 +63,7 @@ if(message is GrpcMessage_Oneof) {
 GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message;
 #>
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = TurboLink)
     <#=oneofMessage.OneofEnum.Name#> <#=oneofMessage.CamelName#>Case;
 <#}#>
 <#
@@ -76,7 +76,7 @@ if(field.NeedNativeMake)
     <#=field.TypeAsNativeField#> <#=field.FieldName#>;
 <#}else{#>
 
-    UPROPERTY(BlueprintReadWrite)
+    UPROPERTY(BlueprintReadWrite, Category = TurboLink)
     <#=field.FieldType#> <#=field.FieldName#><#=field.FieldDefaultValue#>;
 <#}}#>
 };
