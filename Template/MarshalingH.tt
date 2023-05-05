@@ -9,7 +9,7 @@
 <# if(g.GenerateServiceCode) {#>
 #include "TurboLinkGrpcContext.h"
 <#}#>
-#include "<#=System.IO.Path.ChangeExtension(s.FileName, "pb.h")#>"
+#include "<#=System.IO.Path.ChangeExtension(s.FileName, "grpc.pb.h")#>"
 
 <# 
 foreach(GrpcMessage message in s.MessageArray) {
