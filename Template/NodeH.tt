@@ -11,7 +11,7 @@
 #include "TurboLinkGrpcClient.h"
 #include "<#=s.CamelFileName#>Message.h"
 <#
-if(s.ServiceArray.Count>0) {
+if(s.GetTotalPingPongMethodCounts()>0) {
 #>
 #include "<#=s.CamelFileName#>Node.generated.h"
 <#

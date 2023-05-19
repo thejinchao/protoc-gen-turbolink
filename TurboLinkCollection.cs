@@ -291,6 +291,18 @@ namespace protoc_gen_turbolink
 		public List<GrpcMessage> MessageArray { get; set; }
 		public List<GrpcService> ServiceArray { get; set; }
 		public Dictionary<string, int> Message2IndexMap { get; set; }
+		public int GetTotalPingPongMethodCounts()
+		{
+			int totalPingPongMethodCounts = 0;
+			foreach (GrpcService service in ServiceArray)
+			{
+				foreach (GrpcServiceMethod method in service.MethodArray)
+				{
+					if (!method.ClientStreaming && !method.ServerStreaming) totalPingPongMethodCounts++;
+				}
+			}
+			return totalPingPongMethodCounts;
+		}
 		public GrpcServiceFile(FileDescriptorProto protoFileDesc)
 		{
 			ProtoFileDesc = protoFileDesc;

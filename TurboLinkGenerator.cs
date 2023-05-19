@@ -123,18 +123,21 @@ namespace protoc_gen_turbolink
                 GeneratedFiles.Add(file);
 
                 // xxxNode.h
-                Template.NodeH nodeHTemplate = new Template.NodeH(ServiceFile, generateParam);
-                file = new GeneratedFile();
-                file.FileName = string.Join("/", "Public", turboLinkBaseName + "Node.h");
-                file.Content = nodeHTemplate.TransformText();
-                GeneratedFiles.Add(file);
+                if (ServiceFile.GetTotalPingPongMethodCounts() > 0)
+                {
+                    Template.NodeH nodeHTemplate = new Template.NodeH(ServiceFile, generateParam);
+                    file = new GeneratedFile();
+                    file.FileName = string.Join("/", "Public", turboLinkBaseName + "Node.h");
+                    file.Content = nodeHTemplate.TransformText();
+                    GeneratedFiles.Add(file);
 
-                // xxxNode.cpp
-                Template.NodeCPP nodeCPPTemplate = new Template.NodeCPP(ServiceFile, generateParam);
-                file = new GeneratedFile();
-                file.FileName = string.Join("/", "Private", turboLinkBaseName + "Node.cpp");
-                file.Content = nodeCPPTemplate.TransformText();
-                GeneratedFiles.Add(file);
+                    // xxxNode.cpp
+                    Template.NodeCPP nodeCPPTemplate = new Template.NodeCPP(ServiceFile, generateParam);
+                    file = new GeneratedFile();
+                    file.FileName = string.Join("/", "Private", turboLinkBaseName + "Node.cpp");
+                    file.Content = nodeCPPTemplate.TransformText();
+                    GeneratedFiles.Add(file);
+                }
             }
         }
     }
