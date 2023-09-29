@@ -11,10 +11,7 @@
 #include "TurboLinkGrpcUtilities.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
-
-#if !defined(ENGINE_MAJOR_VERSION)
-#include "Launch/Resources/Version.h"
-#endif
+#include "Runtime/Launch/Resources/Version.h"
 <#
 foreach(GrpcService service in s.ServiceArray)
 {
