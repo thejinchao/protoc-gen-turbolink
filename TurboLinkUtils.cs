@@ -41,7 +41,7 @@ namespace protoc_gen_turbolink
             //eg. "google/protobuf/field_mask.proto" -> "FieldMask"
             string fileName = input.Split('/').ToArray().Last();
             fileName = fileName.Split('.').ToArray().First();   // remove extension
-            var words = fileName.Split(new[] { "_", " " }, StringSplitOptions.RemoveEmptyEntries);
+            var words = fileName.Split(new[] { "-", "_", " " }, StringSplitOptions.RemoveEmptyEntries);
             return string.Join(string.Empty, MakeCamelStringArray(words));
         }
         public static string GetMessageName(string grpcName, string prefix="FGrpc")
