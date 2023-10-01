@@ -15,6 +15,9 @@ foreach (string dependency in s.DependencyFiles)
 #include "<#=dependency#>Message.h"
 <#}#>
 <#if(s.EnumArray.Count>0 || s.MessageArray.Count>0) {#>
+<#if(s.NeedBlueprintFunctionLibrary()) {#>
+#include "Kismet/BlueprintFunctionLibrary.h"
+<#}#>
 #include "<#=s.CamelFileName#>Message.generated.h"
 <#}#>
 <#

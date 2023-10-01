@@ -303,6 +303,17 @@ namespace protoc_gen_turbolink
 			}
 			return totalPingPongMethodCounts;
 		}
+		public bool NeedBlueprintFunctionLibrary()
+		{
+			foreach (GrpcMessage message in MessageArray)
+			{
+				if (message.HasNativeMake || message is GrpcMessage_Oneof)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 		public GrpcServiceFile(FileDescriptorProto protoFileDesc)
 		{
 			ProtoFileDesc = protoFileDesc;
