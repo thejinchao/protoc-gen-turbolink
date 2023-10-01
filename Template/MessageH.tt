@@ -22,7 +22,7 @@ foreach (GrpcEnum enumDefine in s.EnumArray)
 {
 #>
 
-UENUM(BlueprintType, meta = (DisplayName="<#=enumDefine.DisplayName#>"))
+UENUM(BlueprintType, meta = (DisplayName="<#=enumDefine.DisplayName#>", ScriptName="<#=enumDefine.Name#>"))
 enum class <#=enumDefine.Name#> : uint8
 {
 <#if(enumDefine.MissingZeroField) {#>
