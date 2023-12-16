@@ -37,9 +37,9 @@ void GrpcContext_<#=service.Name#>_<#=method.Name#>::Call(const <#=method.InputT
 	<#=method.GrpcInputType#> rpcRequest;
 	TURBOLINK_TO_GRPC(&Request, &rpcRequest);
 
-	if (CanSend) {
+	if (bCanSend) {
 		RpcReaderWriter->Write(rpcRequest, WriteTag);
-		CanSend = false;
+		bCanSend = false;
 	}
 	else {
 		SendQueue.push_back(rpcRequest);
@@ -47,7 +47,35 @@ void GrpcContext_<#=service.Name#>_<#=method.Name#>::Call(const <#=method.InputT
 }
 
 <# }else if(method.ClientStreaming && !method.ServerStreaming) { #>
-#pragma error("Client Streaming Not support yet!")
+void GrpcContext_<#=service.Name#>_<#=method.Name#>::Init()
+{
+	check(GetState() == EGrpcContextState::Ready);
+	UpdateState(EGrpcContextState::Initialing);
+
+	U<#=service.Name#>* service = (U<#=service.Name#>*)Service;
+	RpcReaderWriter = service->d->Stub->Async<#=method.Name#>(RpcContext.get(), &(Super::RpcResponse), service->TurboLinkManager->d->CompletionQueue.get(), InitialTag);
+}
+
+void GrpcContext_<#=service.Name#>_<#=method.Name#>::Call(const <#=method.InputType#>& Request)
+{
+	<#=method.GrpcInputType#> rpcRequest;
+	TURBOLINK_TO_GRPC(&Request, &rpcRequest);
+
+	if (bCanSend) {
+		RpcReaderWriter->Write(rpcRequest, WriteTag);
+		bCanSend = false;
+	}
+	else {
+		SendQueue.push_back(rpcRequest);
+	}
+}
+
+void GrpcContext_<#=service.Name#>_<#=method.Name#>::Stop()
+{
+	RpcReaderWriter->WritesDone(WriteTag);
+	bWritesDone = true;
+}
+
 <# } else if(!method.ClientStreaming && method.ServerStreaming) { #>
 void GrpcContext_<#=service.Name#>_<#=method.Name#>::Call(const <#=method.InputType#>& Request)
 {

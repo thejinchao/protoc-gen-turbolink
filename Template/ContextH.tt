@@ -32,6 +32,11 @@ if(method.ClientStreaming) {
 	void Init();
 <#}#>
 	void Call(const <#=method.InputType#>& Request);
+<#
+if(method.ClientStreaming && !method.ServerStreaming) {
+#>
+	void Stop();
+<#}#>
 	virtual void OnRpcEvent(bool Ok, const void* EventTag) override;
 
 public:

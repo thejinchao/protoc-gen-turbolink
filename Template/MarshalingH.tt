@@ -33,7 +33,7 @@ foreach(GrpcService service in s.ServiceArray)
 <#if(method.ClientStreaming && method.ServerStreaming) { #>
 typedef grpc::ClientAsyncReaderWriter<<#=method.GrpcInputType#>, <#=method.GrpcOutputType#>> <#=service.Name#>_<#=method.Name#>_ReaderWriter;
 <# }else if(method.ClientStreaming && !method.ServerStreaming) { #>
-//Not Support method type(<#=service.Name#>_<#=method.Name#>)
+typedef grpc::ClientAsyncWriter<<#=method.GrpcInputType#>> <#=service.Name#>_<#=method.Name#>_ReaderWriter;
 <# } else if(!method.ClientStreaming && method.ServerStreaming) { #>
 typedef grpc::ClientAsyncReader<<#=method.GrpcOutputType#>> <#=service.Name#>_<#=method.Name#>_ReaderWriter;
 <#} else {#>

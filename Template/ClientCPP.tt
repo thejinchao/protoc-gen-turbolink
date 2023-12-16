@@ -37,6 +37,19 @@ void U<#=service.Name#>Client::<#=method.Name#>(FGrpcContextHandle Handle, const
 		context<#=method.Name#>->Call(Request);
 	}
 }
+
+<#if(method.ClientStreaming && !method.ServerStreaming) {#>
+void U<#=service.Name#>Client::Stop<#=method.Name#>(FGrpcContextHandle Handle)
+{
+	auto context = UGrpcClient::GetContext(Handle);
+	if (context != nullptr)
+	{
+		auto context<#=method.Name#> = StaticCastSharedPtr<GrpcContext_<#=service.Name#>_<#=method.Name#>>(*context);
+		context<#=method.Name#>->Stop();
+	}
+}
+
+<#}#>
 <#
 }
 #>

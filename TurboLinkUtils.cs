@@ -171,7 +171,7 @@ namespace protoc_gen_turbolink
             }
             else if (method.ClientStreaming && !method.ServerStreaming)
             {
-                return "NOT_SUPPORT_YET";
+                return "GrpcContext_Stream_Pong";
             }
             else if (!method.ClientStreaming && method.ServerStreaming)
             {
