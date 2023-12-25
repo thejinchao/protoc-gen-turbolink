@@ -32,7 +32,7 @@ class U<#=service.Name#>Client;
 <#
 foreach (GrpcServiceMethod method in service.MethodArray)
 {
-	if(!method.ClientStreaming && !method.ServerStreaming) {
+	if(!method.ClientStreaming) {
 #>
 
 UCLASS(ClassGroup = TurboLink)
@@ -47,12 +47,19 @@ public:
 	static UCall<#=service.Name#><#=method.Name#>* <#=method.Name#>(UObject* WorldContextObject, const <#=method.InputType#>& Request);
 
 	UPROPERTY(BlueprintAssignable)
-	F<#=service.Name#><#=method.Name#>Delegate OnSuccess;
+	F<#=service.Name#><#=method.Name#>Delegate On<#=method.Name#>Response;
 
+<#if(method.ServerStreaming) {#>
+	UPROPERTY(BlueprintAssignable)
+	F<#=service.Name#><#=method.Name#>Delegate OnFinished;
+
+<#}#>
 	UPROPERTY(BlueprintAssignable)
 	F<#=service.Name#><#=method.Name#>Delegate OnFail;
 
 private:
+	virtual void Activate() override;
+
 	UPROPERTY()
 	U<#=service.Name#>* <#=service.Name#>;
 	
@@ -61,6 +68,7 @@ private:
 	
 	FGrpcContextHandle Context;
 	<#=method.InputType#> Request;
+	EGrpcServiceState ServiceState;
 
 	UFUNCTION()
 	void OnServiceStateChanged(EGrpcServiceState NewState);

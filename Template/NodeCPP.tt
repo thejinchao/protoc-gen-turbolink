@@ -17,7 +17,7 @@ foreach(GrpcService service in s.ServiceArray)
 {
 	foreach (GrpcServiceMethod method in service.MethodArray)
 	{
-		if(!method.ClientStreaming && !method.ServerStreaming) {
+		if(!method.ClientStreaming) {
 #>
 
 UCall<#=service.Name#><#=method.Name#>* UCall<#=service.Name#><#=method.Name#>::<#=method.Name#>(UObject* WorldContextObject, const <#=method.InputType#>& Request)
@@ -31,16 +31,22 @@ UCall<#=service.Name#><#=method.Name#>* UCall<#=service.Name#><#=method.Name#>::
 		return nullptr;
 	}
 	node->Request = Request;
+	node->ServiceState = EGrpcServiceState::Idle;
 
 	node-><#=service.Name#>->OnServiceStateChanged.AddUniqueDynamic(node, &UCall<#=service.Name#><#=method.Name#>::OnServiceStateChanged);
-	WorldContextObject->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([node]() {
-		node-><#=service.Name#>->Connect();
-	}));
 	return node;
+}
+
+void UCall<#=service.Name#><#=method.Name#>::Activate()
+{
+	<#=service.Name#>->Connect();
 }
 
 void UCall<#=service.Name#><#=method.Name#>::OnServiceStateChanged(EGrpcServiceState NewState)
 {
+	if (ServiceState == NewState) return;
+	ServiceState = NewState;
+
 	if (NewState == EGrpcServiceState::TransientFailure)
 	{
 		FGrpcResult result;
@@ -68,6 +74,9 @@ void UCall<#=service.Name#><#=method.Name#>::OnContextStateChange(FGrpcContextHa
 {
 	if (State == EGrpcContextState::Done)
 	{
+<#if(method.ServerStreaming) {#>
+		OnFinished.Broadcast(FGrpcResult{}, <#=method.OutputType#>{});
+<#}#>
 		Shutdown();
 	}
 }
@@ -76,7 +85,7 @@ void UCall<#=service.Name#><#=method.Name#>::OnResponse(FGrpcContextHandle Handl
 {
 	if (GrpcResult.Code == EGrpcResultCode::Ok)
 	{
-		OnSuccess.Broadcast(GrpcResult, Response);
+		On<#=method.Name#>Response.Broadcast(GrpcResult, Response);
 	}
 	else
 	{
