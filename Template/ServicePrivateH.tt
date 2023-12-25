@@ -28,6 +28,7 @@ public:
 	std::shared_ptr<UTurboLinkGrpcManager::Private::ServiceChannel> Channel;
 	std::unique_ptr<::<#=s.GrpcPackageName#>::<#=service.Name#>::Stub> Stub;
 };
+
 <#
 }
 #>
