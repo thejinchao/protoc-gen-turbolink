@@ -106,16 +106,28 @@ void GrpcContext_<#=service.Name#>_<#=method.Name#>::Call(const <#=method.InputT
 <#}#>
 void GrpcContext_<#=service.Name#>_<#=method.Name#>::OnRpcEvent(bool Ok, const void* EventTag)
 {
-	Super::OnRpcEventInternal(Ok, EventTag, [this](const FGrpcResult& _Result, <#=method.GrpcOutputType#>* _RpcResponse) {
-		U<#=service.Name#>Client* client = (U<#=service.Name#>Client*)(this->Client);
-		if (!(client->On<#=method.Name#>Response.IsBound())) return;
+	Super::OnRpcEventInternal(Ok, EventTag, 
+		[this](const FGrpcResult& _Result, <#=method.GrpcOutputType#>* _RpcResponse) 
+		{
+			U<#=service.Name#>Client* client = (U<#=service.Name#>Client*)(this->Client);
+			if (!(client->On<#=method.Name#>Response.IsBound())) return;
 
-		<#=method.OutputType#> response;
-		if (_RpcResponse) {
-			GRPC_TO_TURBOLINK(_RpcResponse, &response);
+			<#=method.OutputType#> response;
+			if (_RpcResponse) {
+				GRPC_TO_TURBOLINK(_RpcResponse, &response);
+			}
+			client->On<#=method.Name#>Response.Broadcast(Handle, _Result, response);
 		}
-		client->On<#=method.Name#>Response.Broadcast(Handle, _Result, response);
-	});
+<#if(method.ClientStreaming) {#>
+		, [this]() 
+		{
+			U<#=service.Name#>Client* client = (U<#=service.Name#>Client*)(this->Client);
+			if (!(client->On<#=method.Name#>WriteComplete.IsBound())) return;
+
+			client->On<#=method.Name#>WriteComplete.Broadcast(Handle);
+		}
+<#}#>
+	);
 }
 <#
 	}

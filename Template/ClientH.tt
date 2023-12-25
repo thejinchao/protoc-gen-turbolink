@@ -22,6 +22,9 @@ foreach(GrpcService service in s.ServiceArray)
 foreach (GrpcServiceMethod method in service.MethodArray)
 {
 #>
+<#if(method.ClientStreaming) {#>
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOn<#=service.Name#><#=method.Name#>WriteComplete, FGrpcContextHandle, Handle);
+<#}#>
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOn<#=service.Name#><#=method.Name#>Response, FGrpcContextHandle, Handle, const FGrpcResult&, GrpcResult, const <#=method.OutputType#>&, Response);
 <#
 }
@@ -37,6 +40,11 @@ public:
 foreach (GrpcServiceMethod method in service.MethodArray)
 {
 #>
+<#if(method.ClientStreaming) {#>
+	UPROPERTY(BlueprintAssignable)
+	FOn<#=service.Name#><#=method.Name#>WriteComplete On<#=method.Name#>WriteComplete;
+
+<#}#>
 	UPROPERTY(BlueprintAssignable)
 	FOn<#=service.Name#><#=method.Name#>Response On<#=method.Name#>Response;
 
