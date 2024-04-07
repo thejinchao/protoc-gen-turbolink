@@ -9,6 +9,14 @@
 #include "<#=s.TurboLinkBasicFileName#>Client.h"
 #include "<#=s.CamelFileName#>Service_Private.h"
 #include "<#=s.CamelFileName#>Marshaling.h"
+<#
+foreach(String dependency in s.DependencyFiles)
+{
+#>
+#include "<#=dependency#>Marshaling.h"
+<#
+}
+#>
 #include "TurboLinkGrpcManager.h"
 <#
 foreach(GrpcService service in s.ServiceArray)
