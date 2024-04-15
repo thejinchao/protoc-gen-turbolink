@@ -32,7 +32,7 @@ void U<#=service.Name#>::Connect()
 	UE_LOG(LogTurboLink, Warning, TEXT("Connect to <#=service.Name#>: '%s'"), *serviceEndPoint);
 
 	if (d->Channel == nullptr) {
-		d->Channel = TurboLinkManager->d->CreateServiceChannel(TCHAR_TO_UTF8(*serviceEndPoint), this);
+		d->Channel = TurboLinkManager->d->CreateServiceChannel((const char*)StringCast<UTF8CHAR>(*serviceEndPoint).Get(), this);
 	}
 	if (d->Stub == nullptr) {
 		d->Stub = <#=s.GrpcPackageName#>::<#=service.Name#>::NewStub(d->Channel->RpcChannel);

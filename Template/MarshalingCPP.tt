@@ -24,7 +24,7 @@ foreach(GrpcMessage message in s.MessageArray)
 private void ConvertFieldFromGrpcToTurboLink(GrpcMessageField field, string getField)
 {
 #>
-<#+if(field.FieldDesc.Type==FieldDescriptorProto.Types.Type.String) { #>UTF8_TO_TCHAR(<#=getField#>.c_str())<#+
+<#+if(field.FieldDesc.Type==FieldDescriptorProto.Types.Type.String) { #>StringCast<TCHAR>((const UTF8CHAR*)(<#=getField#>.c_str())).Get()<#+
 }else if(field.FieldDesc.Type==FieldDescriptorProto.Types.Type.Bytes) {#>FBytes((const uint8*)<#=getField#>.c_str(), <#=getField#>.length())<#+
 }else if(field.FieldDesc.Type==FieldDescriptorProto.Types.Type.Enum) { #>StaticCast<<#=field.FieldType#>>(<#=getField#>)<#+}
 else {#><#=getField#><#+}#>
@@ -35,7 +35,7 @@ else {#><#=getField#><#+}#>
 private void ConvertFieldFromTurboLinkToGrpc(GrpcMessageField field, string getField)
 {
 #>
-<#+if(field.FieldDesc.Type==FieldDescriptorProto.Types.Type.String) { #>TCHAR_TO_UTF8(*(<#=getField#>))<#+
+<#+if(field.FieldDesc.Type==FieldDescriptorProto.Types.Type.String) { #>(const char*)StringCast<UTF8CHAR>(*(<#=getField#>)).Get()<#+
 } else if(field.FieldDesc.Type==FieldDescriptorProto.Types.Type.Bytes) { #>std::string((const char*)(<#=getField#>.Value.GetData()), (size_t)<#=getField#>.Value.Num())<#+
 } else if(field.FieldDesc.Type==FieldDescriptorProto.Types.Type.Enum) { #><#=field.FieldGrpcType#>(static_cast<uint8>(<#=getField#>))<#+
 } else {#><#=getField#><#+}#>
@@ -61,7 +61,7 @@ if(field is GrpcMessageField_Map) {
 <#+if(field.NeedNativeMake) { #>
         <#=mapField.ValueField.FieldType#> field;
         GRPC_TO_TURBOLINK(&item.second, &field);
-        out-><#=mapField.FieldName#>.Add(UTF8_TO_TCHAR(item.first.c_str()), MakeShareable(new <#=mapField.ValueField.FieldType#>(field)));
+        out-><#=mapField.FieldName#>.Add(StringCast<TCHAR>((const UTF8CHAR*)item.first.c_str()).Get(), MakeShareable(new <#=mapField.ValueField.FieldType#>(field)));
 <#+} else { #>
         auto& value = out-><#=mapField.FieldName#>.Add(<#+ConvertFieldFromGrpcToTurboLink(mapField.KeyField, "item.first");#>);
 <#+if(mapField.ValueField.FieldDesc.Type==FieldDescriptorProto.Types.Type.Message) { #>
