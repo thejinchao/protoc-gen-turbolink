@@ -8,6 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>protoc_gen_turbolink</RootNamespace>
     <AssemblyName>protoc-gen-turbolink</AssemblyName>
+    <TargetFramework>net462</TargetFramework>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -70,7 +71,7 @@
     <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
-    <PackageReference Include="ILMerge" Version="3.0.41" />
+    <PackageReference Include="ILRepack" Version="2.0.30" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="System.Text.Json" Version="7.0.2" />
   </ItemGroup>
@@ -233,6 +234,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Grpc.Core.2.46.5\build\net45\Grpc.Core.targets" Condition="Exists('packages\Grpc.Core.2.46.5\build\net45\Grpc.Core.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>$(USERPROFILE)\.nuget\packages\ilmerge\3.0.41\tools\net452\ILMerge.exe $(TargetPath) /out:$(ProjectDir)bin\protoc-gen-turbolink.exe $(TargetDir)Google.Protobuf.dll $(TargetDir)System.Memory.dll $(TargetDir)System.Runtime.CompilerServices.Unsafe.dll $(TargetDir)System.Text.Json.dll $(TargetDir)Microsoft.Bcl.AsyncInterfaces.dll $(TargetDir)System.Text.Encodings.Web.dll $(TargetDir)System.Threading.Tasks.Extensions.dll $(TargetDir)System.Buffers.dll</PostBuildEvent>
+    <PostBuildEvent>$([System.Environment]::GetFolderPath(SpecialFolder.UserProfile))\.nuget\packages\ilrepack\2.0.30\tools\ILRepack.exe /out:$(ProjectDir) $(TargetPath) $(TargetDir)Google.Protobuf.dll $(TargetDir)System.Memory.dll $(TargetDir)System.Runtime.CompilerServices.Unsafe.dll $(TargetDir)System.Text.Json.dll $(TargetDir)Microsoft.Bcl.AsyncInterfaces.dll $(TargetDir)System.Text.Encodings.Web.dll $(TargetDir)System.Threading.Tasks.Extensions.dll $(TargetDir)System.Buffers.dll</PostBuildEvent>
   </PropertyGroup>
 </Project>
