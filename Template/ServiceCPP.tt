@@ -83,9 +83,9 @@ void U<#=service.Name#>::Shutdown()
 #>
 
 <# if(method.ServerStreaming) { #>
-void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, F<#=method.Name#>FinishLambda FinishLambda, TMap<FString, FString>& MetaData)
+void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, F<#=method.Name#>FinishLambda FinishLambda, FGrpcMetaData MetaData)
 <# } else {#>
-void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, TMap<FString, FString>& MetaData)
+void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, FGrpcMetaData MetaData)
 <#}#>
 {
 	if (InnerClient == nullptr)

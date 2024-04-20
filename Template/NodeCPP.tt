@@ -20,7 +20,7 @@ foreach(GrpcService service in s.ServiceArray)
 		if(!method.ClientStreaming) {
 #>
 
-UCall<#=service.Name#><#=method.Name#>* UCall<#=service.Name#><#=method.Name#>::<#=method.Name#>(UObject* WorldContextObject, const <#=method.InputType#>& Request, TMap<FString, FString>& MetaData)
+UCall<#=service.Name#><#=method.Name#>* UCall<#=service.Name#><#=method.Name#>::<#=method.Name#>(UObject* WorldContextObject, const <#=method.InputType#>& request, FGrpcMetaData metaData)
 {
 	UCall<#=service.Name#><#=method.Name#>* node = NewObject<UCall<#=service.Name#><#=method.Name#>>(WorldContextObject);
 	UTurboLinkGrpcManager* turboLinkManager = UTurboLinkGrpcUtilities::GetTurboLinkGrpcManager(WorldContextObject);
@@ -30,9 +30,9 @@ UCall<#=service.Name#><#=method.Name#>* UCall<#=service.Name#><#=method.Name#>::
 	{
 		return nullptr;
 	}
-	node->Request = Request;
 	node->ServiceState = EGrpcServiceState::Idle;
-	node->MetaData = MetaData;
+	node->Request = request;
+	node->MetaData = metaData;
 
 	node-><#=service.Name#>->OnServiceStateChanged.AddUniqueDynamic(node, &UCall<#=service.Name#><#=method.Name#>::OnServiceStateChanged);
 	return node;

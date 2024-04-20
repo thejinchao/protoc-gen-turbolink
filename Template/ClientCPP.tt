@@ -28,16 +28,19 @@ FGrpcContextHandle U<#=service.Name#>Client::Init<#=method.Name#>()
 	return context->GetHandle();
 }
 
-void U<#=service.Name#>Client::<#=method.Name#>(FGrpcContextHandle Handle, const <#=method.InputType#>& Request, TMap<FString, FString>& MetaData)
+void U<#=service.Name#>Client::<#=method.Name#>(FGrpcContextHandle Handle, const <#=method.InputType#>& Request, FGrpcMetaData MetaData)
 {
 	auto context = UGrpcClient::GetContext(Handle);
 	if (context != nullptr)
 	{
-		for (auto const& Pair : MetaData)
-		{
-			context->Get()->RpcContext->AddMetadata(TCHAR_TO_UTF8(*Pair.Key), TCHAR_TO_UTF8(*Pair.Value));
-		}
 		auto context<#=method.Name#> = StaticCastSharedPtr<GrpcContext_<#=service.Name#>_<#=method.Name#>>(*context);
+		for (const auto& metaDataPair : MetaData.MetaData)
+		{
+			context<#=method.Name#>->RpcContext->AddMetadata(
+				(const char*)StringCast<UTF8CHAR>(*(metaDataPair.Key)).Get(),
+				(const char*)StringCast<UTF8CHAR>(*(metaDataPair.Value)).Get()
+			);
+		}
 		context<#=method.Name#>->Call(Request);
 	}
 }
