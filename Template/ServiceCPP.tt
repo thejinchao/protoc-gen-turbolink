@@ -9,6 +9,14 @@
 #include "<#=s.TurboLinkBasicFileName#>Client.h"
 #include "<#=s.CamelFileName#>Service_Private.h"
 #include "<#=s.CamelFileName#>Marshaling.h"
+<#
+foreach(String dependency in s.DependencyFiles)
+{
+#>
+#include "<#=dependency#>Marshaling.h"
+<#
+}
+#>
 #include "TurboLinkGrpcManager_Private.h"
 #include "TurboLinkGrpcUtilities.h"
 <#
@@ -75,9 +83,9 @@ void U<#=service.Name#>::Shutdown()
 #>
 
 <# if(method.ServerStreaming) { #>
-void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, F<#=method.Name#>FinishLambda FinishLambda)
+void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, F<#=method.Name#>FinishLambda FinishLambda, TMap<FString, FString>& MetaData)
 <# } else {#>
-void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda)
+void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, TMap<FString, FString>& MetaData)
 <#}#>
 {
 	if (InnerClient == nullptr)
@@ -99,7 +107,7 @@ void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Reque
 <#
 			}
 #>
-	InnerClient-><#=method.Name#>(lambdaWrapper->Handle, Request);
+	InnerClient-><#=method.Name#>(lambdaWrapper->Handle, Request, MetaData);
 }
 <#
 		}
