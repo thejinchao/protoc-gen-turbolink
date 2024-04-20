@@ -83,9 +83,9 @@ void U<#=service.Name#>::Shutdown()
 #>
 
 <# if(method.ServerStreaming) { #>
-void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, F<#=method.Name#>FinishLambda FinishLambda, FGrpcMetaData MetaData)
+void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, F<#=method.Name#>FinishLambda FinishLambda, FGrpcMetaData MetaData, float DeadLineSeconds)
 <# } else {#>
-void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, FGrpcMetaData MetaData)
+void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, FGrpcMetaData MetaData, float DeadLineSeconds)
 <#}#>
 {
 	if (InnerClient == nullptr)
@@ -107,7 +107,7 @@ void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Reque
 <#
 			}
 #>
-	InnerClient-><#=method.Name#>(lambdaWrapper->Handle, Request, MetaData);
+	InnerClient-><#=method.Name#>(lambdaWrapper->Handle, Request, MetaData, DeadLineSeconds);
 }
 <#
 		}

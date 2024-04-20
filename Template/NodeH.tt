@@ -47,8 +47,8 @@ public:
 		BlueprintInternalUseOnly = "true",
 		WorldContext = "WorldContextObject",
 		DisplayName = "Call <#=service.Name#> <#=method.Name#>",
-		AdvancedDisplay = 1))
-	static UCall<#=service.Name#><#=method.Name#>* <#=method.Name#>(UObject* WorldContextObject, const <#=method.InputType#>& request, FGrpcMetaData metaData = FGrpcMetaData());
+		AdvancedDisplay = 2))
+	static UCall<#=service.Name#><#=method.Name#>* <#=method.Name#>(UObject* WorldContextObject, const <#=method.InputType#>& request, FGrpcMetaData metaData = FGrpcMetaData(), float deadLineSeconds = 0.f);
 
 	UPROPERTY(BlueprintAssignable)
 	F<#=service.Name#><#=method.Name#>Delegate On<#=method.Name#>Response;
@@ -74,6 +74,7 @@ private:
 	<#=method.InputType#> Request;
 	EGrpcServiceState ServiceState;
 	FGrpcMetaData MetaData;
+	float DeadLineSeconds;
 
 	UFUNCTION()
 	void OnServiceStateChanged(EGrpcServiceState NewState);

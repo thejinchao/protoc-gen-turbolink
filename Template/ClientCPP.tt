@@ -28,7 +28,7 @@ FGrpcContextHandle U<#=service.Name#>Client::Init<#=method.Name#>()
 	return context->GetHandle();
 }
 
-void U<#=service.Name#>Client::<#=method.Name#>(FGrpcContextHandle Handle, const <#=method.InputType#>& Request, FGrpcMetaData MetaData)
+void U<#=service.Name#>Client::<#=method.Name#>(FGrpcContextHandle Handle, const <#=method.InputType#>& Request, FGrpcMetaData MetaData, float DeadLineSeconds)
 {
 	auto context = UGrpcClient::GetContext(Handle);
 	if (context != nullptr)
@@ -40,6 +40,13 @@ void U<#=service.Name#>Client::<#=method.Name#>(FGrpcContextHandle Handle, const
 				(const char*)StringCast<UTF8CHAR>(*(metaDataPair.Key)).Get(),
 				(const char*)StringCast<UTF8CHAR>(*(metaDataPair.Value)).Get()
 			);
+		}
+
+		if (DeadLineSeconds > 0.f)
+		{
+			std::chrono::time_point deadLine = std::chrono::system_clock::now() + 
+				std::chrono::milliseconds((int32)(1000.f * DeadLineSeconds));
+			context<#=method.Name#>->RpcContext->set_deadline(deadLine);
 		}
 		context<#=method.Name#>->Call(Request);
 	}
