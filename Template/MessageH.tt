@@ -67,7 +67,7 @@ GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message;
 #>
 
     UPROPERTY(BlueprintReadWrite, Category = TurboLink)
-    <#=oneofMessage.OneofEnum.Name#> <#=oneofMessage.CamelName#>Case;
+    <#=oneofMessage.OneofEnum.Name#> <#=oneofMessage.CamelName#>Case{};
 <#}#>
 <#
 foreach(GrpcMessageField field in message.Fields)
