@@ -47,8 +47,8 @@ if(message.HasNativeMake || message is GrpcMessage_Oneof)
 #>
 
 USTRUCT(BlueprintType, meta = (DisplayName="<#=message.DisplayName#>",
-    HasNativeMake = "TurboLinkGrpc.<#=message.Name.Substring(1)#>HelperLibrary.Make<#=message.CamelName#>",
-    HasNativeBreak = "TurboLinkGrpc.<#=message.Name.Substring(1)#>HelperLibrary.Break<#=message.CamelName#>"))
+    HasNativeMake = "/Script/TurboLinkGrpc.<#=message.Name.Substring(1)#>HelperLibrary.Make<#=message.CamelName#>",
+    HasNativeBreak = "/Script/TurboLinkGrpc.<#=message.Name.Substring(1)#>HelperLibrary.Break<#=message.CamelName#>"))
 <#} else {#>
 
 USTRUCT(BlueprintType, meta = (DisplayName="<#=message.DisplayName#>"))
@@ -67,7 +67,7 @@ GrpcMessage_Oneof oneofMessage = (GrpcMessage_Oneof)message;
 #>
 
     UPROPERTY(BlueprintReadWrite, Category = TurboLink)
-    <#=oneofMessage.OneofEnum.Name#> <#=oneofMessage.CamelName#>Case;
+    <#=oneofMessage.OneofEnum.Name#> <#=oneofMessage.CamelName#>Case{};
 <#}#>
 <#
 foreach(GrpcMessageField field in message.Fields)
