@@ -1,2 +1,8 @@
 /bin
 /obj
+Template/*.cs
+!Template/TemplateModel.cs
+
+# IDE
+.vs
+.idea

@@ -57,7 +57,7 @@ foreach (GrpcServiceMethod method in service.MethodArray)
 {
 #>
 	UFUNCTION(BlueprintCallable, Category = TurboLink)
-	FGrpcContextHandle Init<#=method.Name#>();
+	FGrpcContextHandle Init<#=method.Name#>(<#if(method.ClientStreaming) {#>FGrpcMetaData MetaData<#}#>);
 
 	UFUNCTION(BlueprintCallable, Category = TurboLink, meta = (AdvancedDisplay = 2))
 	void <#=method.Name#>(FGrpcContextHandle Handle, const <#=method.InputType#>& Request, FGrpcMetaData MetaData = FGrpcMetaData(), float DeadLineSeconds = 0.f);
