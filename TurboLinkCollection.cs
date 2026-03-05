@@ -485,6 +485,20 @@ namespace protoc_gen_turbolink
 			{
 				for(int i=0; i< protoMessage.OneofDecl.Count; i++)
 				{
+					bool foundOptionals = false;
+					foreach (FieldDescriptorProto field in protoMessage.Field)
+					{
+						if (protoMessage.OneofDecl[i].Name == "_" + field.Name && field.Proto3Optional)
+						{
+							foundOptionals = true;
+                        }
+                    }
+
+					if (foundOptionals)
+					{
+						break;
+					}
+
 					oneofMessageMap.Add(i, new Tuple<int, int>(serviceFile.EnumArray.Count, serviceFile.MessageArray.Count));
 
 					GrpcEnum oneofEnum = new GrpcEnum();
@@ -522,7 +536,7 @@ namespace protoc_gen_turbolink
 					messageField = new GrpcMessageField_Single(field);
 				}
 
-				if (field.HasOneofIndex)
+				if (field.HasOneofIndex && !field.HasProto3Optional)
 				{
 					//add enum field
 					GrpcEnum oneofEnum = serviceFile.EnumArray[oneofMessageMap[field.OneofIndex].Item1];
