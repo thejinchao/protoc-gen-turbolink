@@ -40,7 +40,7 @@ void U<#=service.Name#>::Connect()
 	UE_LOG(LogTurboLink, Warning, TEXT("Connect to <#=service.Name#>: '%s'"), *serviceEndPoint);
 
 	if (d->Channel == nullptr) {
-		d->Channel = TurboLinkManager->d->CreateServiceChannel(TCHAR_TO_UTF8(*serviceEndPoint), this);
+		d->Channel = TurboLinkManager->d->CreateServiceChannel((const char*)StringCast<UTF8CHAR>(*serviceEndPoint).Get(), this);
 	}
 	if (d->Stub == nullptr) {
 		d->Stub = <#=s.GrpcPackageName#>::<#=service.Name#>::NewStub(d->Channel->RpcChannel);
@@ -83,9 +83,9 @@ void U<#=service.Name#>::Shutdown()
 #>
 
 <# if(method.ServerStreaming) { #>
-void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, F<#=method.Name#>FinishLambda FinishLambda, TMap<FString, FString>& MetaData)
+void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, F<#=method.Name#>FinishLambda FinishLambda, FGrpcMetaData MetaData, float DeadLineSeconds)
 <# } else {#>
-void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, TMap<FString, FString>& MetaData)
+void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Request, F<#=method.Name#>ResponseLambda ResponseLambda, FGrpcMetaData MetaData, float DeadLineSeconds)
 <#}#>
 {
 	if (InnerClient == nullptr)
@@ -107,7 +107,7 @@ void U<#=service.Name#>::Call<#=method.Name#>(const <#=method.InputType#>& Reque
 <#
 			}
 #>
-	InnerClient-><#=method.Name#>(lambdaWrapper->Handle, Request, MetaData);
+	InnerClient-><#=method.Name#>(lambdaWrapper->Handle, Request, MetaData, DeadLineSeconds);
 }
 <#
 		}
